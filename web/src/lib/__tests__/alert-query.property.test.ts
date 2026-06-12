@@ -9,6 +9,7 @@ import {
 import { EMPTY_FILTER } from '@/lib/types';
 import type { Alert, AlertFilter, Severity, SortKey } from '@/lib/types';
 import {
+  alertArb,
   alertsArb,
   filterArb,
   sortSpecArb,
@@ -75,6 +76,33 @@ function compareBySpec(a: Alert, b: Alert, key: SortKey): number {
 }
 
 const whitespaceArb = fc.string({ unit: fc.constantFrom(' ', '\t', '\n') });
+
+/**
+ * A non-empty alert list, a target alert picked from it, and a needle that
+ * is a verbatim substring of one of the target's searchable fields
+ * (title, source, id, or assignee-when-non-null).
+ */
+const positiveHitArb = fc
+  .tuple(
+    fc.array(alertArb, { minLength: 1 }),
+    fc.nat(),
+    fc.nat(),
+    fc.nat(),
+    fc.nat(),
+  )
+  .map(([alerts, alertSeed, fieldSeed, startSeed, endSeed]) => {
+    const target = alerts[alertSeed % alerts.length];
+    const fields = [target.title, target.source, target.id];
+    if (target.assignee !== null) {
+      fields.push(target.assignee);
+    }
+    const field = fields[fieldSeed % fields.length];
+    const bounds = [
+      startSeed % (field.length + 1),
+      endSeed % (field.length + 1),
+    ].sort((a, b) => a - b);
+    return { alerts, target, needle: field.slice(bounds[0], bounds[1]) };
+  });
 
 describe('filterAlerts', () => {
   it('output is an order-preserving subsequence of the input (by reference)', () => {
@@ -177,6 +205,51 @@ describe('searchAlerts', () => {
     );
   });
 
+  it('completeness: every excluded alert fails the match for non-empty queries', () => {
+    fc.assert(
+      fc.property(alertsArb, fc.string(), (alerts, query) => {
+        fc.pre(query.trim() !== '');
+        const { excluded } = matchSubsequence(
+          alerts,
+          searchAlerts(alerts, query),
+        );
+        for (const alert of excluded) {
+          expect(matchesSearch(alert, query)).toBe(false);
+        }
+      }),
+    );
+  });
+
+  it('a substring of any searchable field finds that alert', () => {
+    fc.assert(
+      fc.property(positiveHitArb, ({ alerts, target, needle }) => {
+        fc.pre(needle.trim() !== '');
+        expect(searchAlerts(alerts, needle).map((a) => a.id)).toContain(
+          target.id,
+        );
+      }),
+    );
+  });
+
+  it('is case-insensitive on the haystack side: an uppercased field still matches a lowercase needle', () => {
+    fc.assert(
+      fc.property(positiveHitArb, ({ alerts, target, needle }) => {
+        fc.pre(needle.trim() !== '');
+        const upperTarget: Alert = {
+          ...target,
+          id: target.id.toUpperCase(),
+          title: target.title.toUpperCase(),
+          assignee:
+            target.assignee === null ? null : target.assignee.toUpperCase(),
+        };
+        const mutated = alerts.map((a) => (a === target ? upperTarget : a));
+        expect(searchAlerts(mutated, needle.toLowerCase())).toContain(
+          upperTarget,
+        );
+      }),
+    );
+  });
+
   it('is case-insensitive: search(q) ≡ search(q.toUpperCase()) ≡ search(q.toLowerCase())', () => {
     fc.assert(
       fc.property(alertsArb, fc.string(), (alerts, query) => {
@@ -254,6 +327,25 @@ describe('sortAlerts', () => {
         expect(alerts).toEqual(snapshot);
       }),
     );
+  });
+
+  it('anchor: desc severity orders exactly critical, high, medium, low', () => {
+    const makeAlert = (severity: Severity, i: number): Alert => ({
+      id: `anchor-${i}`,
+      title: `Anchor alert ${i}`,
+      severity,
+      status: 'open',
+      source: 'Okta',
+      createdAt: '2024-06-01T12:00:00.000Z',
+      assignee: null,
+    });
+    const severities: Severity[] = ['low', 'medium', 'high', 'critical'];
+    const alerts = severities.map(makeAlert);
+    expect(
+      sortAlerts(alerts, { key: 'severity', direction: 'desc' }).map(
+        (a) => a.severity,
+      ),
+    ).toEqual(['critical', 'high', 'medium', 'low']);
   });
 
   it('is stable: equal-key elements keep their relative input order', () => {
