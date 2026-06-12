@@ -1,0 +1,15 @@
+# dependencies / build output
+web/node_modules/
+web/.next/
+web/out/
+web/*.tsbuildinfo
+web/next-env.d.ts
+
+# dotnet
+api/**/bin/
+api/**/obj/
+
+# misc
+.DS_Store
+*.log
+.env*
