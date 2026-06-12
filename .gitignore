@@ -1,5 +1,5 @@
 # dependencies / build output
-web/node_modules/
+node_modules/
 web/.next/
 web/out/
 web/*.tsbuildinfo
