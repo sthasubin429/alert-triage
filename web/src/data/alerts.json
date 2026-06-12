@@ -1,0 +1,1802 @@
+[
+  {
+    "id": "AL-0001",
+    "title": "Outbound TLS to newly-registered domain from WS-HR-015",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-03T06:05:08.867Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0002",
+    "title": "IAM access key exfiltration pattern for ava.m@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-02T09:17:54.104Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0003",
+    "title": "Ransomware-like file encryption behavior on WS-HR-015",
+    "severity": "high",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-11T03:14:29.228Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0004",
+    "title": "EC2 instance WS-FIN-007 communicating with known C2 domain",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T16:50:06.127Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0005",
+    "title": "S3 bucket enumeration from unusual ASN by noah.w@corp.example",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-30T23:28:23.273Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0006",
+    "title": "MFA fatigue: repeated push denials for noah.k@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-10T18:26:33.877Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0007",
+    "title": "Root account console login without MFA",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-03T10:23:39.126Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0008",
+    "title": "Unsigned driver loaded on SRV-K8S-NODE-09",
+    "severity": "medium",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-31T11:50:39.730Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0009",
+    "title": "Root account console login without MFA",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-01T18:55:00.837Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0010",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-10T14:06:18.650Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0011",
+    "title": "DNS tunneling pattern detected from WS-ENG-042",
+    "severity": "low",
+    "status": "open",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-09T12:03:33.595Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0012",
+    "title": "SQL injection attempt against SRV-WEB-EDGE-03",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-03T04:41:18.461Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0013",
+    "title": "Privileged role granted to maya.t@corp.example outside change window",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-01T16:13:33.844Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0014",
+    "title": "Malicious macro attachment quarantined for sofia.w@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-02T01:59:15.693Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0015",
+    "title": "MFA fatigue: repeated push denials for liam.t@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-09T16:56:27.491Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0016",
+    "title": "MFA fatigue: repeated push denials for sofia.k@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-05-30T11:03:52.163Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0017",
+    "title": "Outbound TLS to newly-registered domain from LT-SALES-118",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-02T15:06:59.932Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0018",
+    "title": "SQL injection attempt against WS-ENG-042",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-05T06:12:16.355Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0019",
+    "title": "Suspicious inbox forwarding rule created by maya.t@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-30T11:26:45.525Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0020",
+    "title": "DNS tunneling pattern detected from WS-FIN-007",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-30T23:12:50.359Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0021",
+    "title": "Suspicious PowerShell execution on WS-FIN-007",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-31T13:49:53.785Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0022",
+    "title": "Business email compromise attempt impersonating CFO to sofia.t@corp.example",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-29T20:59:21.596Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0023",
+    "title": "Phishing campaign: credential-harvest link delivered to maya.w@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-29T14:48:12.692Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0024",
+    "title": "CryptoMining:EC2 bitcoin pool contact from WS-FIN-007",
+    "severity": "high",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T19:49:45.497Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0025",
+    "title": "SMB exploit attempt (EternalBlue) targeting WS-HR-015",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-05T10:24:23.836Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0026",
+    "title": "MFA fatigue: repeated push denials for noah.m@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-02T22:28:55.832Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0027",
+    "title": "Suspicious PowerShell execution on SRV-K8S-NODE-09",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-10T14:48:22.081Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0028",
+    "title": "MFA fatigue: repeated push denials for noah.w@corp.example",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-06-02T17:50:11.843Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0029",
+    "title": "Business email compromise attempt impersonating CFO to maya.w@corp.example",
+    "severity": "high",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-02T14:09:38.865Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0030",
+    "title": "Root account console login without MFA",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-04T11:40:39.957Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0031",
+    "title": "Malicious macro attachment quarantined for ethan.t@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-31T15:52:03.809Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0032",
+    "title": "Outbound TLS to newly-registered domain from SRV-AD-DC-02",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-01T06:26:06.970Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0033",
+    "title": "DNS tunneling pattern detected from SRV-WEB-EDGE-03",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-07T05:52:42.782Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0034",
+    "title": "DNS tunneling pattern detected from SRV-AD-DC-02",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-08T03:39:27.640Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0035",
+    "title": "SMB exploit attempt (EternalBlue) targeting WS-FIN-007",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-10T23:38:10.608Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0036",
+    "title": "Outbound TLS to newly-registered domain from SRV-WEB-EDGE-03",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-09T15:41:20.584Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0037",
+    "title": "Brute-force lockout threshold reached for ava.w@corp.example",
+    "severity": "high",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-02T04:47:31.782Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0038",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-08T15:25:36.286Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0039",
+    "title": "MFA fatigue: repeated push denials for noah.m@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-01T01:16:06.951Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0040",
+    "title": "Suspicious PowerShell execution on WS-ENG-042",
+    "severity": "low",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-03T20:43:01.278Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0041",
+    "title": "Privileged role granted to ava.t@corp.example outside change window",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-01T00:04:38.144Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0042",
+    "title": "Unsigned driver loaded on SRV-WEB-EDGE-03",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-09T13:03:35.277Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0043",
+    "title": "SQL injection attempt against WS-HR-015",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-04T05:22:31.256Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0044",
+    "title": "CryptoMining:EC2 bitcoin pool contact from WS-ENG-042",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-07T10:22:21.623Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0045",
+    "title": "Brute-force lockout threshold reached for liam.k@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-05-31T01:33:36.890Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0046",
+    "title": "Malicious macro attachment quarantined for noah.k@corp.example",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-09T18:47:29.318Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0047",
+    "title": "Malicious macro attachment quarantined for noah.t@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-08T11:15:56.357Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0048",
+    "title": "Malicious macro attachment quarantined for liam.k@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-11T02:14:21.469Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0049",
+    "title": "SMB exploit attempt (EternalBlue) targeting WS-HR-015",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-04T19:49:03.483Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0050",
+    "title": "EC2 instance SRV-AD-DC-02 communicating with known C2 domain",
+    "severity": "high",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-01T20:08:25.730Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0051",
+    "title": "Privileged role granted to sofia.w@corp.example outside change window",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-05T19:28:55.299Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0052",
+    "title": "Unsigned driver loaded on LT-SALES-118",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-30T06:04:23.885Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0053",
+    "title": "CryptoMining:EC2 bitcoin pool contact from LT-SALES-118",
+    "severity": "low",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-29T06:53:53.722Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0054",
+    "title": "Suspicious inbox forwarding rule created by maya.w@corp.example",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-05T02:58:19.153Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0055",
+    "title": "SMB exploit attempt (EternalBlue) targeting SRV-DB-PROD-01",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-08T11:49:13.157Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0056",
+    "title": "ET MALWARE Cobalt Strike beacon from WS-FIN-007",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-29T08:34:53.241Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0057",
+    "title": "ET MALWARE Cobalt Strike beacon from SRV-AD-DC-02",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-05T11:07:07.378Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0058",
+    "title": "SQL injection attempt against SRV-WEB-EDGE-03",
+    "severity": "medium",
+    "status": "open",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-10T22:56:44.954Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0059",
+    "title": "Outbound TLS to newly-registered domain from LT-SALES-118",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-29T07:53:10.483Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0060",
+    "title": "Outbound TLS to newly-registered domain from LT-SALES-118",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-11T03:42:19.469Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0061",
+    "title": "Suspicious PowerShell execution on LT-SALES-118",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-06T07:40:48.784Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0062",
+    "title": "Unsigned driver loaded on SRV-AD-DC-02",
+    "severity": "low",
+    "status": "resolved",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-03T21:06:26.000Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0063",
+    "title": "S3 bucket enumeration from unusual ASN by maya.k@corp.example",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-30T01:46:15.282Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0064",
+    "title": "S3 bucket enumeration from unusual ASN by noah.t@corp.example",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-07T04:37:57.982Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0065",
+    "title": "Root account console login without MFA",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-29T08:04:45.250Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0066",
+    "title": "DNS tunneling pattern detected from SRV-DB-PROD-01",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-04T19:48:35.114Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0067",
+    "title": "Brute-force lockout threshold reached for liam.k@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-09T12:47:00.822Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0068",
+    "title": "Outbound TLS to newly-registered domain from SRV-K8S-NODE-09",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-05T15:10:06.077Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0069",
+    "title": "Outbound TLS to newly-registered domain from WS-FIN-007",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-11T17:37:53.760Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0070",
+    "title": "Impossible travel sign-in for ava.w@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-08T02:19:47.145Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0071",
+    "title": "Privileged role granted to ava.w@corp.example outside change window",
+    "severity": "high",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-05-30T14:44:46.915Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0072",
+    "title": "Business email compromise attempt impersonating CFO to noah.k@corp.example",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-06T07:49:52.124Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0073",
+    "title": "Business email compromise attempt impersonating CFO to maya.t@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-04T16:21:34.847Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0074",
+    "title": "Business email compromise attempt impersonating CFO to noah.t@corp.example",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-08T20:19:40.161Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0075",
+    "title": "Privileged role granted to sofia.m@corp.example outside change window",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-02T23:18:11.312Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0076",
+    "title": "Malicious macro attachment quarantined for sofia.k@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-06T06:41:16.278Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0077",
+    "title": "Sign-in from anonymizing proxy for maya.w@corp.example",
+    "severity": "high",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-01T06:43:05.695Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0078",
+    "title": "IAM access key exfiltration pattern for ava.m@corp.example",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-07T22:02:56.650Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0079",
+    "title": "Lateral movement via PsExec from SRV-WEB-EDGE-03",
+    "severity": "low",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-03T22:45:53.085Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0080",
+    "title": "Phishing campaign: credential-harvest link delivered to liam.t@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-11T16:57:47.185Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0081",
+    "title": "Sign-in from anonymizing proxy for maya.t@corp.example",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-06-10T06:10:34.162Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0082",
+    "title": "DNS tunneling pattern detected from WS-HR-015",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-31T11:32:47.947Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0083",
+    "title": "Suspicious inbox forwarding rule created by liam.w@corp.example",
+    "severity": "low",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-02T14:21:11.717Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0084",
+    "title": "Unsigned driver loaded on SRV-AD-DC-02",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-04T15:24:47.139Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0085",
+    "title": "Brute-force lockout threshold reached for noah.w@corp.example",
+    "severity": "low",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-11T10:42:03.716Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0086",
+    "title": "Brute-force lockout threshold reached for ava.w@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-11T00:50:17.372Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0087",
+    "title": "SMB exploit attempt (EternalBlue) targeting LT-SALES-118",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-06T03:43:46.918Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0088",
+    "title": "EC2 instance SRV-K8S-NODE-09 communicating with known C2 domain",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-04T04:20:00.195Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0089",
+    "title": "Sign-in from anonymizing proxy for maya.k@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-05-30T16:58:50.630Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0090",
+    "title": "CryptoMining:EC2 bitcoin pool contact from WS-FIN-007",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-29T07:05:15.420Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0091",
+    "title": "Root account console login without MFA",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T02:17:53.086Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0092",
+    "title": "SQL injection attempt against SRV-K8S-NODE-09",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-07T20:17:28.463Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0093",
+    "title": "MFA fatigue: repeated push denials for ava.w@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-05-31T20:02:13.254Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0094",
+    "title": "S3 bucket enumeration from unusual ASN by noah.k@corp.example",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-30T18:47:49.101Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0095",
+    "title": "IAM access key exfiltration pattern for ethan.m@corp.example",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-07T21:52:30.073Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0096",
+    "title": "Unsigned driver loaded on WS-HR-015",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-03T16:08:23.428Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0097",
+    "title": "Malicious macro attachment quarantined for noah.w@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-09T15:26:35.772Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0098",
+    "title": "Brute-force lockout threshold reached for ava.t@corp.example",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-05-31T10:55:18.216Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0099",
+    "title": "Unsigned driver loaded on WS-HR-015",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-03T02:25:43.405Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0100",
+    "title": "SMB exploit attempt (EternalBlue) targeting SRV-AD-DC-02",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-31T12:46:09.159Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0101",
+    "title": "DNS tunneling pattern detected from WS-FIN-007",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-30T21:02:39.930Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0102",
+    "title": "EC2 instance SRV-DB-PROD-01 communicating with known C2 domain",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-09T06:01:11.311Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0103",
+    "title": "MFA fatigue: repeated push denials for noah.w@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-08T20:18:27.104Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0104",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-03T16:46:59.522Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0105",
+    "title": "S3 bucket enumeration from unusual ASN by liam.k@corp.example",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-10T02:08:08.206Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0106",
+    "title": "Phishing campaign: credential-harvest link delivered to ava.m@corp.example",
+    "severity": "high",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-11T00:28:51.738Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0107",
+    "title": "IAM access key exfiltration pattern for noah.k@corp.example",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-09T14:39:53.632Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0108",
+    "title": "Outbound TLS to newly-registered domain from WS-ENG-042",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-10T03:54:55.867Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0109",
+    "title": "SMB exploit attempt (EternalBlue) targeting SRV-K8S-NODE-09",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-31T00:55:03.633Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0110",
+    "title": "Ransomware-like file encryption behavior on LT-SALES-118",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-29T07:28:19.677Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0111",
+    "title": "Credential dumping attempt detected on LT-SALES-118",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-31T15:11:03.247Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0112",
+    "title": "Suspicious inbox forwarding rule created by ethan.m@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-06T20:14:19.166Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0113",
+    "title": "Privileged role granted to ava.m@corp.example outside change window",
+    "severity": "critical",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-09T08:16:03.549Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0114",
+    "title": "Malicious macro attachment quarantined for ethan.k@corp.example",
+    "severity": "high",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-09T14:50:13.946Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0115",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-08T08:41:45.811Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0116",
+    "title": "Phishing campaign: credential-harvest link delivered to ava.m@corp.example",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-01T23:42:21.997Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0117",
+    "title": "Root account console login without MFA",
+    "severity": "medium",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-06T14:12:00.672Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0118",
+    "title": "Malicious macro attachment quarantined for maya.w@corp.example",
+    "severity": "low",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-30T09:45:49.605Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0119",
+    "title": "IAM access key exfiltration pattern for liam.m@corp.example",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T06:26:52.008Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0120",
+    "title": "EC2 instance SRV-K8S-NODE-09 communicating with known C2 domain",
+    "severity": "critical",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-04T07:15:58.166Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0121",
+    "title": "MFA fatigue: repeated push denials for sofia.m@corp.example",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-05T17:32:09.450Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0122",
+    "title": "ET MALWARE Cobalt Strike beacon from WS-ENG-042",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-30T17:01:35.064Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0123",
+    "title": "SQL injection attempt against SRV-K8S-NODE-09",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-03T10:03:10.556Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0124",
+    "title": "IAM access key exfiltration pattern for liam.m@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T01:26:13.187Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0125",
+    "title": "MFA fatigue: repeated push denials for ava.w@corp.example",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-02T17:34:10.089Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0126",
+    "title": "EC2 instance WS-FIN-007 communicating with known C2 domain",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-01T05:34:45.617Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0127",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-01T05:29:50.669Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0128",
+    "title": "Suspicious PowerShell execution on WS-ENG-042",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-07T22:32:04.968Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0129",
+    "title": "Sign-in from anonymizing proxy for ethan.k@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-05-30T03:12:59.000Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0130",
+    "title": "Ransomware-like file encryption behavior on SRV-DB-PROD-01",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-29T22:10:18.440Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0131",
+    "title": "Sign-in from anonymizing proxy for ava.t@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-10T13:36:47.172Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0132",
+    "title": "Outbound TLS to newly-registered domain from LT-SALES-118",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-09T18:38:49.647Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0133",
+    "title": "ET MALWARE Cobalt Strike beacon from WS-ENG-042",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-10T15:23:29.314Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0134",
+    "title": "S3 bucket enumeration from unusual ASN by maya.t@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-09T17:55:47.809Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0135",
+    "title": "Unsigned driver loaded on SRV-AD-DC-02",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-10T08:48:48.334Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0136",
+    "title": "Business email compromise attempt impersonating CFO to maya.t@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-05T12:39:27.065Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0137",
+    "title": "Unsigned driver loaded on SRV-AD-DC-02",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-05T23:48:30.851Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0138",
+    "title": "Impossible travel sign-in for ethan.m@corp.example",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-05-30T07:42:35.823Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0139",
+    "title": "MFA fatigue: repeated push denials for ethan.t@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-09T21:11:00.962Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0140",
+    "title": "EC2 instance WS-HR-015 communicating with known C2 domain",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-01T18:24:54.459Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0141",
+    "title": "Unsigned driver loaded on SRV-WEB-EDGE-03",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-09T08:14:57.484Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0142",
+    "title": "Suspicious inbox forwarding rule created by ethan.m@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-04T03:48:20.861Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0143",
+    "title": "EC2 instance SRV-K8S-NODE-09 communicating with known C2 domain",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-05T16:06:36.563Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0144",
+    "title": "Impossible travel sign-in for maya.m@corp.example",
+    "severity": "critical",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-05-30T00:40:06.209Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0145",
+    "title": "CryptoMining:EC2 bitcoin pool contact from SRV-K8S-NODE-09",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-11T07:24:42.362Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0146",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-01T12:11:09.535Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0147",
+    "title": "Phishing campaign: credential-harvest link delivered to ethan.k@corp.example",
+    "severity": "critical",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-31T15:35:08.651Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0148",
+    "title": "ET MALWARE Cobalt Strike beacon from SRV-DB-PROD-01",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-10T15:52:43.401Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0149",
+    "title": "Suspicious PowerShell execution on WS-FIN-007",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-09T01:50:22.049Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0150",
+    "title": "CryptoMining:EC2 bitcoin pool contact from WS-FIN-007",
+    "severity": "low",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-02T20:33:04.663Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0151",
+    "title": "Lateral movement via PsExec from SRV-AD-DC-02",
+    "severity": "high",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-10T08:23:54.163Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0152",
+    "title": "MFA fatigue: repeated push denials for sofia.m@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-03T13:38:06.886Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0153",
+    "title": "ET MALWARE Cobalt Strike beacon from SRV-DB-PROD-01",
+    "severity": "low",
+    "status": "open",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-03T12:59:36.470Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0154",
+    "title": "S3 bucket enumeration from unusual ASN by liam.w@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-29T04:10:27.264Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0155",
+    "title": "EC2 instance SRV-K8S-NODE-09 communicating with known C2 domain",
+    "severity": "low",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-06T04:52:59.200Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0156",
+    "title": "MFA fatigue: repeated push denials for ethan.t@corp.example",
+    "severity": "low",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-07T02:30:12.276Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0157",
+    "title": "DNS tunneling pattern detected from LT-SALES-118",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-01T20:25:45.777Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0158",
+    "title": "Business email compromise attempt impersonating CFO to liam.w@corp.example",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-11T14:06:00.035Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0159",
+    "title": "CryptoMining:EC2 bitcoin pool contact from WS-FIN-007",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-10T12:41:54.107Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0160",
+    "title": "Credential dumping attempt detected on WS-HR-015",
+    "severity": "critical",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-30T00:25:43.814Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0161",
+    "title": "MFA fatigue: repeated push denials for noah.k@corp.example",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-06-02T09:14:30.727Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0162",
+    "title": "EC2 instance SRV-AD-DC-02 communicating with known C2 domain",
+    "severity": "low",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-31T17:11:06.474Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0163",
+    "title": "CryptoMining:EC2 bitcoin pool contact from SRV-WEB-EDGE-03",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-10T02:06:30.995Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0164",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "high",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-31T15:20:17.384Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0165",
+    "title": "SMB exploit attempt (EternalBlue) targeting WS-FIN-007",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-08T14:10:58.841Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0166",
+    "title": "EC2 instance WS-FIN-007 communicating with known C2 domain",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-07T12:21:59.212Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0167",
+    "title": "Sign-in from anonymizing proxy for maya.w@corp.example",
+    "severity": "critical",
+    "status": "false_positive",
+    "source": "Okta",
+    "createdAt": "2026-06-09T14:22:32.812Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0168",
+    "title": "Impossible travel sign-in for noah.k@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-05-31T16:40:18.133Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0169",
+    "title": "Ransomware-like file encryption behavior on SRV-DB-PROD-01",
+    "severity": "high",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-06T06:05:32.973Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0170",
+    "title": "Root account console login without MFA",
+    "severity": "medium",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-09T21:22:22.369Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0171",
+    "title": "Phishing campaign: credential-harvest link delivered to ethan.m@corp.example",
+    "severity": "high",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-08T03:17:03.401Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0172",
+    "title": "Malicious macro attachment quarantined for ava.k@corp.example",
+    "severity": "medium",
+    "status": "open",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-07T10:42:10.202Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0173",
+    "title": "DNS tunneling pattern detected from SRV-WEB-EDGE-03",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-31T20:21:38.878Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0174",
+    "title": "Impossible travel sign-in for ethan.k@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-02T20:47:16.007Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0175",
+    "title": "MFA fatigue: repeated push denials for maya.m@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-01T11:00:29.466Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0176",
+    "title": "EC2 instance SRV-WEB-EDGE-03 communicating with known C2 domain",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-31T13:28:48.404Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0177",
+    "title": "SMB exploit attempt (EternalBlue) targeting WS-ENG-042",
+    "severity": "critical",
+    "status": "open",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-09T03:41:16.315Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0178",
+    "title": "Malicious macro attachment quarantined for maya.t@corp.example",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-05-29T19:26:37.498Z",
+    "assignee": "ethan.tanaka"
+  },
+  {
+    "id": "AL-0179",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-07T17:13:04.715Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0180",
+    "title": "EC2 instance SRV-AD-DC-02 communicating with known C2 domain",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-03T05:53:43.793Z",
+    "assignee": "noah.lindqvist"
+  },
+  {
+    "id": "AL-0181",
+    "title": "Credential dumping attempt detected on WS-ENG-042",
+    "severity": "critical",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-30T09:44:59.700Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0182",
+    "title": "SMB exploit attempt (EternalBlue) targeting SRV-WEB-EDGE-03",
+    "severity": "low",
+    "status": "open",
+    "source": "Suricata IDS",
+    "createdAt": "2026-05-29T18:07:36.990Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0183",
+    "title": "Ransomware-like file encryption behavior on SRV-DB-PROD-01",
+    "severity": "high",
+    "status": "resolved",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-02T15:27:10.516Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0184",
+    "title": "Suspicious PowerShell execution on WS-FIN-007",
+    "severity": "high",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-08T14:52:58.446Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0185",
+    "title": "ET MALWARE Cobalt Strike beacon from WS-FIN-007",
+    "severity": "low",
+    "status": "resolved",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-07T00:18:47.257Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0186",
+    "title": "Lateral movement via PsExec from WS-FIN-007",
+    "severity": "high",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-04T01:15:06.140Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0187",
+    "title": "MFA fatigue: repeated push denials for ethan.m@corp.example",
+    "severity": "critical",
+    "status": "open",
+    "source": "Okta",
+    "createdAt": "2026-06-09T03:25:47.334Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0188",
+    "title": "Brute-force lockout threshold reached for sofia.t@corp.example",
+    "severity": "medium",
+    "status": "resolved",
+    "source": "Okta",
+    "createdAt": "2026-06-06T00:00:14.083Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0189",
+    "title": "Unsigned driver loaded on LT-SALES-118",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-08T20:15:11.528Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0190",
+    "title": "MFA fatigue: repeated push denials for maya.t@corp.example",
+    "severity": "critical",
+    "status": "acknowledged",
+    "source": "Okta",
+    "createdAt": "2026-06-02T08:37:02.559Z",
+    "assignee": "liam.okafor"
+  },
+  {
+    "id": "AL-0191",
+    "title": "Bulk spear-phish wave targeting finance team",
+    "severity": "medium",
+    "status": "acknowledged",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-05T22:31:44.907Z",
+    "assignee": "maya.chen"
+  },
+  {
+    "id": "AL-0192",
+    "title": "EC2 instance LT-SALES-118 communicating with known C2 domain",
+    "severity": "high",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-10T05:59:52.107Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0193",
+    "title": "Credential dumping attempt detected on WS-FIN-007",
+    "severity": "medium",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-05-29T22:32:22.462Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0194",
+    "title": "IAM access key exfiltration pattern for liam.k@corp.example",
+    "severity": "critical",
+    "status": "open",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-06-06T08:47:14.047Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0195",
+    "title": "Phishing campaign: credential-harvest link delivered to maya.w@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "Email Gateway",
+    "createdAt": "2026-06-04T06:02:34.812Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0196",
+    "title": "S3 bucket enumeration from unusual ASN by ethan.t@corp.example",
+    "severity": "critical",
+    "status": "resolved",
+    "source": "AWS GuardDuty",
+    "createdAt": "2026-05-30T16:40:39.299Z",
+    "assignee": "sofia.reyes"
+  },
+  {
+    "id": "AL-0197",
+    "title": "Outbound TLS to newly-registered domain from SRV-DB-PROD-01",
+    "severity": "low",
+    "status": "false_positive",
+    "source": "Suricata IDS",
+    "createdAt": "2026-06-05T05:39:52.586Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0198",
+    "title": "Suspicious PowerShell execution on WS-ENG-042",
+    "severity": "low",
+    "status": "resolved",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-06T14:42:05.093Z",
+    "assignee": "ava.petrov"
+  },
+  {
+    "id": "AL-0199",
+    "title": "Ransomware-like file encryption behavior on SRV-DB-PROD-01",
+    "severity": "medium",
+    "status": "open",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-05T08:50:31.279Z",
+    "assignee": null
+  },
+  {
+    "id": "AL-0200",
+    "title": "Lateral movement via PsExec from LT-SALES-118",
+    "severity": "low",
+    "status": "acknowledged",
+    "source": "CrowdStrike EDR",
+    "createdAt": "2026-06-11T21:07:08.037Z",
+    "assignee": "maya.chen"
+  }
+]
