@@ -44,7 +44,7 @@ function FilterGroup<T extends string>({
       aria-label={`Filter by ${label}`}
       className="flex items-center gap-1"
     >
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-dim">
+      <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-dim">
         {label}
       </span>
       {values.map((value) => {
@@ -55,7 +55,7 @@ function FilterGroup<T extends string>({
             type="button"
             aria-pressed={isActive}
             onClick={() => onToggle(value)}
-            className={`h-7 rounded-sm border px-2 font-mono text-[11px] transition-colors ${
+            className={`h-7 rounded-sm border px-2 font-mono text-[11px] transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70 ${
               isActive
                 ? 'border-accent/60 bg-accent/15 text-fore'
                 : 'border-edge bg-panel-2 text-faint hover:border-edge-2 hover:text-fore'
@@ -102,7 +102,7 @@ export default function FilterBar({
           placeholder="search title, source, id, assignee"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-7 w-64 rounded-sm border border-edge bg-panel-2 pl-6 pr-2 font-mono text-[11px] text-fore placeholder:text-dim outline-none transition-colors hover:border-edge-2 focus:border-accent/60"
+          className="h-7 w-64 rounded-sm border border-edge bg-panel-2 pl-6 pr-2 font-mono text-[11px] text-fore placeholder:text-dim outline-none transition-colors hover:border-edge-2 focus:border-accent/60 focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70"
         />
       </div>
 
@@ -132,7 +132,7 @@ export default function FilterBar({
         <button
           type="button"
           onClick={onClear}
-          className="h-7 rounded-sm border border-edge px-2 font-mono text-[11px] text-faint transition-colors hover:border-edge-2 hover:text-fore"
+          className="h-7 rounded-sm border border-edge px-2 font-mono text-[11px] text-faint transition-colors hover:border-edge-2 hover:text-fore focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70"
         >
           Clear filters
         </button>

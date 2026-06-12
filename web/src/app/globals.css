@@ -5,6 +5,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root {
+  color-scheme: dark;
+}
+
 @theme {
   /* SOC night-console palette */
   --color-canvas: #07090d;

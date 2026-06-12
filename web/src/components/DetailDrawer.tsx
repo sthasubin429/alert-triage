@@ -29,7 +29,7 @@ function Field({
 }) {
   return (
     <div className="border-b border-edge/60 py-2.5">
-      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-dim">
+      <dt className="font-mono text-[11px] uppercase tracking-[0.14em] text-dim">
         {label}
       </dt>
       <dd className="mt-1 text-[13px]">{children}</dd>
@@ -52,7 +52,7 @@ export default function DetailDrawer({
       aria-label="Alert detail"
       aria-hidden={!visible}
       inert={!visible}
-      className={`fixed inset-y-0 right-0 z-30 flex w-[26rem] max-w-full flex-col border-l border-edge bg-panel shadow-[-24px_0_48px_-24px_rgb(0_0_0/0.8)] transition-transform duration-200 ease-out ${
+      className={`fixed inset-y-0 right-0 z-30 flex w-[26rem] max-w-full flex-col border-l border-edge bg-panel shadow-[-24px_0_48px_-24px_rgb(0_0_0/0.8)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
         visible ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -69,7 +69,7 @@ export default function DetailDrawer({
               type="button"
               onClick={onClose}
               aria-label="Close drawer"
-              className="rounded-sm border border-edge px-2 py-1 font-mono text-[11px] text-faint transition-colors hover:border-edge-2 hover:text-fore"
+              className="rounded-sm border border-edge px-2 py-1 font-mono text-[11px] text-faint transition-colors hover:border-edge-2 hover:text-fore focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70"
             >
               esc
             </button>
@@ -82,7 +82,7 @@ export default function DetailDrawer({
             <Field label="Status">
               <StatusBadge status={alert.status} />
               {now !== null && isStale(alert, now) && (
-                <span className="ml-2 rounded-sm border border-amber-500/50 bg-amber-500/15 px-1.5 py-px font-mono text-[10px] uppercase tracking-[0.08em] text-amber-300">
+                <span className="ml-2 rounded-sm border border-amber-500/50 bg-amber-500/15 px-1.5 py-px font-mono text-[11px] uppercase tracking-[0.08em] text-amber-300">
                   SLA breach
                 </span>
               )}
@@ -102,7 +102,7 @@ export default function DetailDrawer({
           </dl>
 
           <footer className="border-t border-edge px-4 py-3">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-dim">
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-dim">
               Set status
             </p>
             <div className="grid grid-cols-2 gap-1.5">
@@ -114,7 +114,7 @@ export default function DetailDrawer({
                     type="button"
                     disabled={current}
                     onClick={() => onSetStatus(alert.id, status)}
-                    className={`h-8 rounded-sm border px-2 text-xs transition-colors ${
+                    className={`h-8 rounded-sm border px-2 text-xs transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70 ${
                       current
                         ? 'border-accent/60 bg-accent/15 font-medium text-accent'
                         : 'border-edge bg-panel-2 text-faint hover:border-edge-2 hover:text-fore'

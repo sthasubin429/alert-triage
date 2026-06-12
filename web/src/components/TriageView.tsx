@@ -145,7 +145,7 @@ export default function TriageView({
         <span className="font-mono text-[11px] tabular-nums text-faint">
           {counts.stale === null ? '—' : counts.stale} past SLA
         </span>
-        <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.14em] text-dim">
+        <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.14em] text-dim">
           SOC console / mini-view
         </span>
       </header>
@@ -179,7 +179,7 @@ export default function TriageView({
         {HINTS.map((hint) => (
           <span
             key={hint.keys}
-            className="font-mono text-[10px] tracking-wide text-dim"
+            className="font-mono text-[11px] tracking-wide text-dim"
           >
             <kbd className="rounded-sm border border-edge bg-panel-2 px-1 py-px text-faint">
               {hint.keys}

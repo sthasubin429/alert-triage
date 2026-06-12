@@ -37,3 +37,66 @@ Built with Claude Code using multi-agent orchestration: one planning agent desig
 ## What I'd do differently for production
 
 Real persistence (Postgres + the schema in `api/sql/schema.sql`) with optimistic concurrency surfaced as 409s; authn/authz and an audit trail with actor identity; status-transition state machine; wire the frontend to the API with optimistic updates; URL-synced filter state; virtualized table for >10k alerts; pagination on the list endpoint; Playwright e2e + CI (lint/test/build/image scan); OpenTelemetry; non-root container user.
+
+PRODUCTION: in a real system this endpoint would change in several ways:
+- Persistence: alerts live in Postgres (see api/sql/schema.sql), not a process-local dictionary.
+- AuthN/AuthZ: require a bearer token (OIDC/JWT) and check the caller may modify this alert.
+- Optimistic concurrency: client sends If-Match / row_version; a stale version returns 409 Conflict  (UPDATE ... WHERE id = $1 AND row_version = $3 affecting 0 rows).
+- Audit trail: every transition is recorded in alert_status_history with the acting principal.
+- Idempotency: accept an Idempotency-Key header so retried PATCHes are safe.
+- State machine: validate allowed transitions (e.g. resolved -> open requires a reopen action), not just membership in the allowed set.
+- Observability: OpenTelemetry traces/metrics and structured logs around the update.
+- Rate limiting: per-principal limits to protect against abusive or runaway clients.
+
+```c#
+app.MapPatch("/api/alerts/{id}/status", async (string id, HttpRequest request) =>
+{
+    UpdateStatusRequest? body = null;
+    try
+    {
+        body = await request.ReadFromJsonAsync<UpdateStatusRequest>();
+    }
+    catch (JsonException)
+    {
+        // fall through: body stays null and we return a 400 ValidationProblem below
+    }
+    catch (InvalidOperationException)
+    {
+        // missing/incorrect content type — treat the same as a missing body
+    }
+
+    var status = body?.Status;
+    if (status is null || !allowedStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.ValidationProblem(new Dictionary<string, string[]>
+        {
+            ["status"] = [
+                $"A JSON body like {{\"status\":\"acknowledged\"}} is required. " +
+                $"Allowed values: {string.Join(", ", allowedStatuses)}."
+            ]
+        });
+    }
+
+    // Normalize to the canonical lowercase form used by the frontend vocabulary.
+    var normalized = allowedStatuses.First(s => s.Equals(status, StringComparison.OrdinalIgnoreCase));
+
+    // Atomic update: re-read and retry if another writer swapped the value in between.
+    while (true)
+    {
+        if (!alerts.TryGetValue(id, out var existing))
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: $"Alert '{id}' not found.");
+        }
+
+        var updated = existing with { Status = normalized };
+        if (alerts.TryUpdate(id, updated, existing))
+        {
+            return Results.Ok(updated);
+        }
+        // Lost the race — loop and try again against the latest value.
+    }
+});
+```
+
