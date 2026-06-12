@@ -1,26 +1,47 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import 'tailwindcss';
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* SOC night-console palette */
+  --color-canvas: #07090d;
+  --color-panel: #0c0f15;
+  --color-panel-2: #11151d;
+  --color-edge: #1c222d;
+  --color-edge-2: #29313f;
+  --color-fore: #d5dbe6;
+  --color-faint: #6b7589;
+  --color-dim: #49525f;
+  --color-accent: #4cc9b0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-fore);
+  font-family: var(--font-sans);
+  background-image:
+    radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgb(76 201 176 / 0.05),
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgb(255 255 255 / 0.004) 2px,
+      rgb(255 255 255 / 0.004) 4px
+    );
+}
+
+::selection {
+  background-color: rgb(76 201 176 / 0.25);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge-2) transparent;
 }
