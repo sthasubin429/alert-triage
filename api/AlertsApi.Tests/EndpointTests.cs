@@ -87,6 +87,7 @@ public class EndpointTests : IClassFixture<WebApplicationFactory<Program>>
             new { status = "acknowledged" });
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]

@@ -17,4 +17,8 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+# Run as the non-root 'app' user shipped with the aspnet:8.0 image; the app
+# listens on the non-privileged port 8080 so no root capabilities are needed.
+USER app
+
 ENTRYPOINT ["dotnet", "AlertsApi.dll"]

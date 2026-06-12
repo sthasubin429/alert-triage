@@ -51,7 +51,11 @@ CREATE TABLE alerts (
 
 -- The triage queue is the hot path: "open criticals, newest first" and
 -- similar filters. A composite index on (status, severity, created_at DESC)
--- serves filter-by-status[/severity] with a recency sort without a re-sort.
+-- serves dual-equality status+severity filters with a recency sort without a
+-- re-sort. A status-only filter can still use the index for the filter, but
+-- the rows come back ordered by (severity, created_at), so a recency sort
+-- needs a re-sort; if that query is hot, add a (status, created_at DESC)
+-- index (optionally INCLUDE-ing the listed columns) alongside this one.
 CREATE INDEX idx_alerts_status_severity_created_at
     ON alerts (status, severity, created_at DESC);
 
@@ -64,8 +68,10 @@ CREATE INDEX idx_alerts_status_severity_created_at
 CREATE TABLE alert_status_history (
     id          bigserial   PRIMARY KEY,
     alert_id    text        NOT NULL REFERENCES alerts (id),
-    old_status  text        NOT NULL,
-    new_status  text        NOT NULL,
+    old_status  text        NOT NULL
+        CHECK (old_status IN ('open', 'acknowledged', 'resolved', 'false_positive')),
+    new_status  text        NOT NULL
+        CHECK (new_status IN ('open', 'acknowledged', 'resolved', 'false_positive')),
     -- The authenticated principal that made the change (user id / service id).
     changed_by  text        NOT NULL,
     changed_at  timestamptz NOT NULL DEFAULT now()
@@ -82,18 +88,23 @@ CREATE INDEX idx_alert_status_history_alert_id
 --   $1 = alert id, $2 = new status, $3 = row_version the client last saw,
 --   $4 = acting principal.
 --
--- Step 1: conditional update guarded by row_version.
+-- Step 1: conditional update guarded by row_version. Note that RETURNING
+-- yields the POST-update row, so the pre-update status must be captured
+-- explicitly — here via a self-join, which exposes the old row as 'old':
 --
 --   UPDATE alerts
 --      SET status      = $2,
 --          updated_at  = now(),
---          row_version = row_version + 1
---    WHERE id = $1
---      AND row_version = $3
---   RETURNING *;
+--          row_version = alerts.row_version + 1
+--     FROM alerts old
+--    WHERE alerts.id = old.id
+--      AND alerts.id = $1
+--      AND alerts.row_version = $3
+--   RETURNING alerts.*, old.status AS old_status;
 --
---   * 1 row returned  -> success; the RETURNING row is the response body and
---                        its old status feeds the audit insert below.
+--   * 1 row returned  -> success; the RETURNING row (minus old_status) is the
+--                        response body, and its old_status column feeds the
+--                        audit insert below.
 --   * 0 rows returned -> either the id does not exist (-> 404) or another
 --                        writer bumped row_version first (-> 409 Conflict;
 --                        the client must re-fetch and retry). Distinguish the
@@ -103,7 +114,7 @@ CREATE INDEX idx_alert_status_history_alert_id
 -- can never drift from the alerts table.
 --
 --   INSERT INTO alert_status_history (alert_id, old_status, new_status, changed_by)
---   VALUES ($1, <status from before the update>, $2, $4);
+--   VALUES ($1, <old_status from the RETURNING row above>, $2, $4);
 --
 -- COMMIT. If either statement fails, the whole transaction rolls back.
 -- ---------------------------------------------------------------------------

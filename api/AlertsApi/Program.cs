@@ -66,7 +66,9 @@ app.MapPatch("/api/alerts/{id}/status", async (string id, HttpRequest request) =
     {
         if (!alerts.TryGetValue(id, out var existing))
         {
-            return Results.NotFound();
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: $"Alert '{id}' not found.");
         }
 
         var updated = existing with { Status = normalized };

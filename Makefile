@@ -51,12 +51,12 @@ api-run: api-build ## Run the API in the foreground on http://localhost:5080
 	docker run --rm -p 5080:8080 --name alerts-api alerts-api
 
 api-test: ## Run xunit integration tests inside the .NET SDK container
-	docker run --rm -v "$(CURDIR)/api:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test AlertsApi.Tests/AlertsApi.Tests.csproj
+	docker run --rm --user $$(id -u):$$(id -g) -e DOTNET_CLI_HOME=/tmp -e XDG_DATA_HOME=/tmp -e NUGET_PACKAGES=/tmp/nuget -v "$(CURDIR)/api:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test AlertsApi.Tests/AlertsApi.Tests.csproj
 
 api-smoke: api-build ## Build, start, curl health + status-update happy/sad paths, stop
+	-docker rm -f alerts-api-smoke 2>/dev/null || true
 	docker run --rm -d -p 5080:8080 --name alerts-api-smoke alerts-api
-	sleep 2
-	curl -fsS http://localhost:5080/healthz
+	curl -fsS --retry 10 --retry-connrefused --retry-all-errors --retry-delay 1 http://localhost:5080/healthz
 	curl -fsS -X PATCH http://localhost:5080/api/alerts/AL-0001/status \
 		-H 'Content-Type: application/json' -d '{"status":"acknowledged"}'
 	test "$$(curl -s -o /dev/null -w '%{http_code}' -X PATCH http://localhost:5080/api/alerts/AL-0001/status \
