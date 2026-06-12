@@ -37,8 +37,10 @@ start: web/node_modules ## Serve the production build
 	cd web && npm run start
 
 test: test-web api-test ## Run ALL tests: TypeScript + C# xunit (in Docker)
+	@printf "\n\033[1;32m  ✔ ALL TEST SUITES PASSED\033[0m  (TypeScript frontend + C# API)\n\n"
 
 test-web: ## TypeScript unit + property-based tests (falls back to Docker without Node)
+	@printf "\n\033[1;36m━━ 1/2 TypeScript tests (vitest + fast-check) ━━\033[0m\n"
 	@if command -v node >/dev/null 2>&1; then \
 		$(MAKE) test-web-local; \
 	else \
@@ -72,6 +74,7 @@ data: web/node_modules ## Regenerate the seeded mock alerts JSON (deterministic)
 	cd web && npm run data
 
 check: lint format-check typecheck test ## Full quality gate: lint + format + types + all tests
+	@printf "\033[1;32m  ✔ CHECK PASSED\033[0m  (lint + format + types + all tests)\n\n"
 
 ## ---------- C# API (api/, Docker only — no local dotnet needed) ----------
 
@@ -82,7 +85,9 @@ api-run: api-build ## Run the API in the foreground on http://localhost:5080
 	docker run --rm -p 5080:8080 --name alerts-api alerts-api
 
 api-test: ## Run xunit integration tests inside the .NET SDK container
-	docker run --rm --user $$(id -u):$$(id -g) -e DOTNET_CLI_HOME=/tmp -e XDG_DATA_HOME=/tmp -e NUGET_PACKAGES=/tmp/nuget -v "$(CURDIR)/api:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test AlertsApi.Tests/AlertsApi.Tests.csproj
+	@printf "\n\033[1;36m━━ 2/2 C# API tests (xunit, in Docker) ━━\033[0m\n"
+	docker run --rm --user $$(id -u):$$(id -g) -e DOTNET_NOLOGO=1 -e DOTNET_CLI_HOME=/tmp -e XDG_DATA_HOME=/tmp -e NUGET_PACKAGES=/tmp/nuget -v "$(CURDIR)/api:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test AlertsApi.Tests/AlertsApi.Tests.csproj
+	@printf "\033[32m  ✔ C# API tests passed\033[0m\n"
 
 api-smoke: api-build ## Build, start, curl health + status-update happy/sad paths, stop
 	-docker rm -f alerts-api-smoke 2>/dev/null || true
