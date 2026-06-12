@@ -38,13 +38,19 @@ export interface SortSpec {
 }
 
 export interface AlertFilter {
-  severity: Severity | null;
-  status: Status | null;
-  source: Source | null;
+  /** Empty array = no constraint; otherwise the alert's value must be included. */
+  severity: readonly Severity[];
+  status: readonly Status[];
+  source: readonly Source[];
 }
 
 export const EMPTY_FILTER: AlertFilter = {
-  severity: null,
-  status: null,
-  source: null,
+  severity: [],
+  status: [],
+  source: [],
 };
+
+export type FilterToggle =
+  | { key: 'severity'; value: Severity }
+  | { key: 'status'; value: Status }
+  | { key: 'source'; value: Source };

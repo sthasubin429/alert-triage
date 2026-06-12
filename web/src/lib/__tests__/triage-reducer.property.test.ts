@@ -28,7 +28,7 @@ function makeState(alerts: readonly Alert[]): TriageState {
   // EMPTY_FILTER module constant.
   return {
     ...initialTriageState(alerts),
-    filter: { severity: null, status: null, source: null },
+    filter: { severity: [], status: [], source: [] },
   };
 }
 
@@ -268,14 +268,29 @@ describe('triageReducer SET_SORT', () => {
   });
 });
 
-describe('triageReducer SET_FILTER / SET_SEARCH', () => {
+describe('triageReducer SET_FILTER / TOGGLE_FILTER / SET_SEARCH', () => {
   const partialFilterArb = fc.record(
     {
-      severity: fc.option(fc.constantFrom(...SEVERITIES), { nil: null }),
-      status: fc.option(fc.constantFrom(...STATUSES), { nil: null }),
-      source: fc.option(fc.constantFrom(...SOURCES), { nil: null }),
+      severity: fc.subarray([...SEVERITIES]),
+      status: fc.subarray([...STATUSES]),
+      source: fc.subarray([...SOURCES]),
     },
     { requiredKeys: [] },
+  );
+
+  const filterToggleArb = fc.oneof(
+    fc.record({
+      key: fc.constant('severity' as const),
+      value: fc.constantFrom(...SEVERITIES),
+    }),
+    fc.record({
+      key: fc.constant('status' as const),
+      value: fc.constantFrom(...STATUSES),
+    }),
+    fc.record({
+      key: fc.constant('source' as const),
+      value: fc.constantFrom(...SOURCES),
+    }),
   );
 
   it('SET_FILTER merges the partial filter into the existing filter', () => {
@@ -288,6 +303,52 @@ describe('triageReducer SET_FILTER / SET_SEARCH', () => {
         });
         expect(next.filter).toEqual({ ...filter, ...partial });
         expect(state.filter).toEqual(filter);
+      }),
+    );
+  });
+
+  it('TOGGLE_FILTER flips membership of exactly that value in that criterion', () => {
+    fc.assert(
+      fc.property(filterArb, filterToggleArb, (filter, toggle) => {
+        const state = deepFreeze({ ...makeState([]), filter });
+        const next = triageReducer(state, {
+          type: 'TOGGLE_FILTER',
+          ...toggle,
+        });
+
+        const wasActive = (filter[toggle.key] as readonly string[]).includes(
+          toggle.value,
+        );
+        const nowActive = (
+          next.filter[toggle.key] as readonly string[]
+        ).includes(toggle.value);
+        expect(nowActive).toBe(!wasActive);
+
+        // every other value of the toggled criterion keeps its membership
+        for (const other of next.filter[toggle.key]) {
+          if (other !== toggle.value) {
+            expect(filter[toggle.key] as readonly string[]).toContain(other);
+          }
+        }
+        // the two untouched criteria are reference-equal
+        for (const key of ['severity', 'status', 'source'] as const) {
+          if (key !== toggle.key) {
+            expect(next.filter[key]).toBe(filter[key]);
+          }
+        }
+      }),
+    );
+  });
+
+  it('TOGGLE_FILTER twice restores the original membership set', () => {
+    fc.assert(
+      fc.property(filterArb, filterToggleArb, (filter, toggle) => {
+        const state = { ...makeState([]), filter };
+        const action = { type: 'TOGGLE_FILTER' as const, ...toggle };
+        const twice = triageReducer(triageReducer(state, action), action);
+        expect([...twice.filter[toggle.key]].sort()).toEqual(
+          [...filter[toggle.key]].sort(),
+        );
       }),
     );
   });
@@ -363,9 +424,9 @@ describe('initialTriageState', () => {
         expect(state.alerts).not.toBe(alerts);
         expect(state.alerts).toEqual(alerts);
         expect(state.filter).toEqual({
-          severity: null,
-          status: null,
-          source: null,
+          severity: [],
+          status: [],
+          source: [],
         });
         expect(state.search).toBe('');
         expect(state.sort).toEqual({ key: 'createdAt', direction: 'desc' });

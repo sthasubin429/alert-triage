@@ -8,8 +8,10 @@ const SEVERITY_RANK: Record<Severity, number> = {
 };
 
 /**
- * Returns the alerts matching every non-null criterion in the filter,
- * preserving input order. A null criterion imposes no constraint.
+ * Returns the alerts matching every non-empty criterion in the filter,
+ * preserving input order. An empty criterion imposes no constraint;
+ * a non-empty one matches any of its selected values (OR within a
+ * criterion, AND across criteria).
  */
 export function filterAlerts(
   alerts: readonly Alert[],
@@ -17,9 +19,10 @@ export function filterAlerts(
 ): Alert[] {
   return alerts.filter(
     (alert) =>
-      (filter.severity === null || alert.severity === filter.severity) &&
-      (filter.status === null || alert.status === filter.status) &&
-      (filter.source === null || alert.source === filter.source),
+      (filter.severity.length === 0 ||
+        filter.severity.includes(alert.severity)) &&
+      (filter.status.length === 0 || filter.status.includes(alert.status)) &&
+      (filter.source.length === 0 || filter.source.includes(alert.source)),
   );
 }
 

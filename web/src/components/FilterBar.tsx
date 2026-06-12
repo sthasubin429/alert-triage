@@ -6,8 +6,7 @@ import {
   SOURCES,
   STATUSES,
   type AlertFilter,
-  type Severity,
-  type Source,
+  type FilterToggle,
   type Status,
 } from '@/lib/types';
 
@@ -18,15 +17,56 @@ interface FilterBarProps {
   totalCount: number;
   searchRef: RefObject<HTMLInputElement | null>;
   onSearchChange: (search: string) => void;
-  onFilterChange: (filter: Partial<AlertFilter>) => void;
+  onToggleFilter: (toggle: FilterToggle) => void;
   onClear: () => void;
 }
 
-const SELECT_CLASS =
-  'h-7 rounded-sm border border-edge bg-panel-2 px-2 font-mono text-[11px] text-fore outline-none transition-colors hover:border-edge-2 focus:border-accent/60';
-
 function formatStatus(status: Status): string {
   return status.replace('_', ' ');
+}
+
+function FilterGroup<T extends string>({
+  label,
+  values,
+  active,
+  format,
+  onToggle,
+}: {
+  label: string;
+  values: readonly T[];
+  active: readonly T[];
+  format?: (value: T) => string;
+  onToggle: (value: T) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={`Filter by ${label}`}
+      className="flex items-center gap-1"
+    >
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-dim">
+        {label}
+      </span>
+      {values.map((value) => {
+        const isActive = active.includes(value);
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onToggle(value)}
+            className={`h-7 rounded-sm border px-2 font-mono text-[11px] transition-colors ${
+              isActive
+                ? 'border-accent/60 bg-accent/15 text-fore'
+                : 'border-edge bg-panel-2 text-faint hover:border-edge-2 hover:text-fore'
+            }`}
+          >
+            {format ? format(value) : value}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function FilterBar({
@@ -36,17 +76,17 @@ export default function FilterBar({
   totalCount,
   searchRef,
   onSearchChange,
-  onFilterChange,
+  onToggleFilter,
   onClear,
 }: FilterBarProps) {
   const anyActive =
     search.trim() !== '' ||
-    filter.severity !== null ||
-    filter.status !== null ||
-    filter.source !== null;
+    filter.severity.length > 0 ||
+    filter.status.length > 0 ||
+    filter.source.length > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-edge bg-panel px-3 py-2">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-edge bg-panel px-3 py-2">
       <div className="relative">
         <span
           aria-hidden
@@ -66,60 +106,27 @@ export default function FilterBar({
         />
       </div>
 
-      <select
-        aria-label="Filter by severity"
-        className={SELECT_CLASS}
-        value={filter.severity ?? ''}
-        onChange={(e) =>
-          onFilterChange({
-            severity:
-              e.target.value === '' ? null : (e.target.value as Severity),
-          })
-        }
-      >
-        <option value="">All severities</option>
-        {SEVERITIES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      <FilterGroup
+        label="severity"
+        values={SEVERITIES}
+        active={filter.severity}
+        onToggle={(value) => onToggleFilter({ key: 'severity', value })}
+      />
 
-      <select
-        aria-label="Filter by status"
-        className={SELECT_CLASS}
-        value={filter.status ?? ''}
-        onChange={(e) =>
-          onFilterChange({
-            status: e.target.value === '' ? null : (e.target.value as Status),
-          })
-        }
-      >
-        <option value="">All statuses</option>
-        {STATUSES.map((s) => (
-          <option key={s} value={s}>
-            {formatStatus(s)}
-          </option>
-        ))}
-      </select>
+      <FilterGroup
+        label="status"
+        values={STATUSES}
+        active={filter.status}
+        format={formatStatus}
+        onToggle={(value) => onToggleFilter({ key: 'status', value })}
+      />
 
-      <select
-        aria-label="Filter by source"
-        className={SELECT_CLASS}
-        value={filter.source ?? ''}
-        onChange={(e) =>
-          onFilterChange({
-            source: e.target.value === '' ? null : (e.target.value as Source),
-          })
-        }
-      >
-        <option value="">All sources</option>
-        {SOURCES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      <FilterGroup
+        label="source"
+        values={SOURCES}
+        active={filter.source}
+        onToggle={(value) => onToggleFilter({ key: 'source', value })}
+      />
 
       {anyActive && (
         <button

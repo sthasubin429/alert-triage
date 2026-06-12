@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import type { Alert, Status } from '@/lib/types';
+import { EMPTY_FILTER, type Alert, type Status } from '@/lib/types';
 import { applyQuery } from '@/lib/alert-query';
 import { isStale } from '@/lib/staleness';
 import { initialTriageState, triageReducer } from '@/lib/triage-reducer';
@@ -157,12 +157,9 @@ export default function TriageView({
         totalCount={state.alerts.length}
         searchRef={searchRef}
         onSearchChange={(s) => dispatch({ type: 'SET_SEARCH', search: s })}
-        onFilterChange={(f) => dispatch({ type: 'SET_FILTER', filter: f })}
+        onToggleFilter={(t) => dispatch({ type: 'TOGGLE_FILTER', ...t })}
         onClear={() => {
-          dispatch({
-            type: 'SET_FILTER',
-            filter: { severity: null, status: null, source: null },
-          });
+          dispatch({ type: 'SET_FILTER', filter: EMPTY_FILTER });
           dispatch({ type: 'SET_SEARCH', search: '' });
         }}
       />

@@ -39,9 +39,9 @@ export const uniqueAlertsArb: fc.Arbitrary<Alert[]> = fc.uniqueArray(alertArb, {
 });
 
 export const filterArb: fc.Arbitrary<AlertFilter> = fc.record({
-  severity: fc.option(fc.constantFrom(...SEVERITIES), { nil: null }),
-  status: fc.option(fc.constantFrom(...STATUSES), { nil: null }),
-  source: fc.option(fc.constantFrom(...SOURCES), { nil: null }),
+  severity: fc.subarray([...SEVERITIES]),
+  status: fc.subarray([...STATUSES]),
+  source: fc.subarray([...SOURCES]),
 });
 
 export const sortKeyArb: fc.Arbitrary<SortKey> = fc.constantFrom(...SORT_KEYS);

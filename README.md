@@ -1,6 +1,6 @@
 # Alert Triage Mini-View
 
-A small Next.js + TypeScript page where a SOC analyst can triage ~200 mock security alerts: sort, filter (severity/status/source), free-text search, a detail drawer, and in-memory status changes. A standalone C# (ASP.NET minimal API) endpoint + SQL schema show how the status update would be backed in a real system.
+A small Next.js + TypeScript page where a SOC analyst can triage ~200 mock security alerts: sort, multi-select filters (severity/status/source — e.g. critical + medium at once), free-text search, a detail drawer, and in-memory status changes. A standalone C# (ASP.NET minimal API) endpoint + SQL schema show how the status update would be backed in a real system.
 
 ## Quickstart
 

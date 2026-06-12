@@ -39,9 +39,10 @@ function matchSubsequence<T>(
 
 function satisfiesFilter(alert: Alert, filter: AlertFilter): boolean {
   return (
-    (filter.severity === null || alert.severity === filter.severity) &&
-    (filter.status === null || alert.status === filter.status) &&
-    (filter.source === null || alert.source === filter.source)
+    (filter.severity.length === 0 ||
+      filter.severity.includes(alert.severity)) &&
+    (filter.status.length === 0 || filter.status.includes(alert.status)) &&
+    (filter.source.length === 0 || filter.source.includes(alert.source))
   );
 }
 

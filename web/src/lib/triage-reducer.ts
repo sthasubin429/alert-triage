@@ -2,6 +2,7 @@ import { EMPTY_FILTER } from '@/lib/types';
 import type {
   Alert,
   AlertFilter,
+  FilterToggle,
   SortKey,
   SortSpec,
   Status,
@@ -22,6 +23,7 @@ export type TriageAction =
   | { type: 'CLOSE_DRAWER' }
   | { type: 'MOVE_SELECTION'; delta: 1 | -1; visibleIds: readonly string[] }
   | { type: 'SET_FILTER'; filter: Partial<AlertFilter> }
+  | ({ type: 'TOGGLE_FILTER' } & FilterToggle)
   | { type: 'SET_SEARCH'; search: string }
   | { type: 'SET_SORT'; key: SortKey };
 
@@ -38,6 +40,13 @@ export function initialTriageState(alerts: readonly Alert[]): TriageState {
 
 function defaultDirectionFor(key: SortKey): SortSpec['direction'] {
   return key === 'createdAt' || key === 'severity' ? 'desc' : 'asc';
+}
+
+/** Removes the value when present, appends it when absent. */
+function toggleValue<T>(values: readonly T[], value: T): readonly T[] {
+  return values.includes(value)
+    ? values.filter((v) => v !== value)
+    : [...values, value];
 }
 
 function nextSelectedId(
@@ -92,6 +101,35 @@ export function triageReducer(
     }
     case 'SET_FILTER':
       return { ...state, filter: { ...state.filter, ...action.filter } };
+    case 'TOGGLE_FILTER': {
+      const { filter } = state;
+      switch (action.key) {
+        case 'severity':
+          return {
+            ...state,
+            filter: {
+              ...filter,
+              severity: toggleValue(filter.severity, action.value),
+            },
+          };
+        case 'status':
+          return {
+            ...state,
+            filter: {
+              ...filter,
+              status: toggleValue(filter.status, action.value),
+            },
+          };
+        case 'source':
+          return {
+            ...state,
+            filter: {
+              ...filter,
+              source: toggleValue(filter.source, action.value),
+            },
+          };
+      }
+    }
     case 'SET_SEARCH':
       return { ...state, search: action.search };
     case 'SET_SORT': {

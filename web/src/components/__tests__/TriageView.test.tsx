@@ -189,10 +189,11 @@ describe('TriageView', () => {
     const user = userEvent.setup();
     render(<TriageView initialAlerts={FIXTURE} />);
     const firstTitle = 'Alpha beacon to known C2 infrastructure';
-    const statusFilter = screen.getByLabelText('Filter by status');
+    const statusGroup = screen.getByRole('group', { name: 'Filter by status' });
+    const openPill = within(statusGroup).getByRole('button', { name: 'open' });
 
-    await user.selectOptions(statusFilter, 'open');
-    await user.keyboard('{Escape}'); // blur the select so hotkeys are live
+    await user.click(openPill);
+    openPill.blur(); // hotkeys no-op while a button has focus
     await user.keyboard('j');
     await user.keyboard('a'); // acknowledge: row leaves the "open" filter
 
@@ -200,11 +201,43 @@ describe('TriageView', () => {
     expect(within(table).queryByText(firstTitle)).not.toBeInTheDocument();
     await user.keyboard('r'); // must no-op: selected row is not visible
 
-    await user.selectOptions(statusFilter, '');
+    await user.click(openPill); // toggle the filter back off
     expect(within(rowOf(firstTitle)).getByText('ack')).toBeInTheDocument();
     expect(
       within(rowOf(firstTitle)).queryByText('resolved'),
     ).not.toBeInTheDocument();
+  });
+
+  it('combines multiple selections within a filter group (critical OR medium)', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const severityGroup = screen.getByRole('group', {
+      name: 'Filter by severity',
+    });
+    const critical = within(severityGroup).getByRole('button', {
+      name: 'critical',
+    });
+    const medium = within(severityGroup).getByRole('button', {
+      name: 'medium',
+    });
+
+    await user.click(critical);
+    await user.click(medium);
+    expect(critical).toHaveAttribute('aria-pressed', 'true');
+    expect(medium).toHaveAttribute('aria-pressed', 'true');
+
+    const tbodyRows = screen
+      .getAllByRole('row')
+      .filter((row) => row.closest('tbody'));
+    expect(tbodyRows).toHaveLength(2); // AL-1001 (critical) + AL-1003 (medium)
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('2 of 5');
+
+    await user.click(medium); // deselect medium again
+    expect(medium).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('1 of 5');
+
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('5 of 5');
   });
 
   it('Enter on a focused sort header sorts without opening the drawer', async () => {
