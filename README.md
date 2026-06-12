@@ -20,31 +20,32 @@ Only Docker is required — `make setup` builds everything from scratch, `make u
 
 ## Key decisions & trade-offs
 
-- **Pure core, thin components.** Filtering/sorting/search (`web/src/lib/alert-query.ts`) and state transitions (`triage-reducer.ts`) are pure functions; the UI is a thin layer over them. This made property-based testing natural and keeps the triage logic portable.
-- **`useReducer` over a store library.** One route, 200 in-memory rows — a pure reducer is simpler than zustand/context and is itself a property-test target.
-- **Frontend stays in-memory; the API stands alone** (the brief allows it). Production path: put the PATCH call behind `NEXT_PUBLIC_API_URL` — optimistic update on dispatch, rollback on a failed response.
-- **Deterministic mock data.** `web/scripts/generate-alerts.mts` uses a seeded PRNG and fixed reference date; the JSON is committed, so reviewers never need to run it (`make data` regenerates byte-identical output).
-- **.NET 8 LTS in Docker.** No local SDK on the dev machine; 8.0 is the long-term-support, zero-surprise image. The `.csproj` files are hand-written (no `dotnet new` available locally).
+- Filtering, sorting and search (`web/src/lib/alert-query.ts`) and every state transition (`triage-reducer.ts`) are pure functions; the React components are a thin layer on top. I wanted the triage logic testable without rendering anything, and most of the suite does run against plain functions, including the property-based tests.
+- State lives in a single `useReducer`. With one route and 200 in-memory rows, zustand or context would be ceremony, and a pure reducer is itself something fast-check can attack.
+- The frontend never calls the API, which the brief allows. Wiring it up would mean putting the PATCH behind `NEXT_PUBLIC_API_URL`, updating optimistically on dispatch and rolling back on a failed response.
+- Mock data is deterministic: `web/scripts/generate-alerts.mts` uses a seeded PRNG and a fixed reference date. The JSON is committed so reviewers never have to run it; `make data` regenerates byte-identical output.
 
 ## UX improvement: saved views as triage queues
 
-Every analyst works the same alert feed differently, so the tab strip turns any combination of filters, search, and sort into a named, persistent view. Three views are built in — **All alerts**, **Hot queue** (critical + high, open, oldest first), and **Assigned to me** — and the `+` tab saves whatever query is currently live as a new tab (stored in `localStorage`, so custom views survive reloads). Pressing `1`–`9` jumps between views. **Rationale: analysts decide where to start before they triage a single alert; letting each analyst define their own queues ("my criticals", "my shift's backlog") keeps them focused on what matters instead of re-building the same filters every shift.**
+Every analyst works the same alert feed differently, so the tab strip turns any combination of filters, search and sort into a named view that survives reloads. Three come built in: All alerts, Hot queue (critical + high, open, oldest first) and Assigned to me. The `+` tab saves whatever query is currently live as a new tab in `localStorage`, and `1`–`9` jumps between views.
 
-Supporting touches that round out the queue-grinding workflow:
+The reasoning: analysts decide where to start before they triage a single alert. If each one can define their own queues ("my criticals", "my shift's backlog"), nobody rebuilds the same filters at the start of every shift.
 
-- **Keyboard-driven triage.** `j`/`k` move the selection, `Enter` opens the drawer, `a`/`r`/`f`/`o` set acknowledged/resolved/false-positive/open, `/` focuses search, `Esc` closes — analysts burn down hundreds of alerts per shift, and keeping hands on the keyboard turns a three-click triage into one keystroke.
-- **Auto-advance.** Disposing an alert with a hotkey moves the selection to the next visible row (Gmail-archive style), so a queue can be cleared without ever touching the mouse.
-- **Undo.** Every status change can be reverted with `u` (a toast confirms each change) — fast hotkeys make mis-keys inevitable, so mistakes must be free.
-- **SLA visibility.** Open alerts that breach a severity-based SLA (critical 2h, high 8h, medium 24h, low 72h) are flagged with an `SLA` chip so the oldest critical work is visible at a glance.
-- **Resizable columns.** Drag the header edges to fit long titles or narrow screens; widths persist locally.
+Smaller things that support the same workflow:
+
+- Keyboard triage: `j`/`k` move the selection, `Enter` opens the drawer, `a`/`r`/`f`/`o` set acknowledged/resolved/false-positive/open, `/` focuses search, `Esc` closes. When you're triaging hundreds of alerts a shift, one keystroke beats three clicks.
+- Auto-advance: disposing an alert with a hotkey selects the next visible row, like archiving in Gmail. A whole queue can be cleared without ever touching the mouse.
+- Undo: `u` reverts the last status change, and a toast confirms each one. Fast hotkeys make mis-keys inevitable, so undoing has to be free.
+- SLA chips: open alerts past a severity-based SLA (critical 2h, high 8h, medium 24h, low 72h) get flagged, which keeps overdue critical work hard to miss.
+- Resizable columns: drag the header edges to fit long titles or narrow screens; widths persist locally.
 
 ## How AI coding agents were used
 
-Built with Claude Code using multi-agent orchestration: one planning agent designed the structure and pinned a known-good dependency set; parallel build agents then implemented independent lanes (C# API + Dockerfile + SQL, the pure TS core, React components, fast-check suites) against a hand-written shared contract (`types.ts` and exact function signatures). I specified the contract, reducer semantics, test invariants, and design direction up front, and reviewed/verified everything through `make check`, `make api-test`, and `make api-smoke`. Overrides: pinned Next 15.5 instead of the agent-default latest 16.x for tooling compatibility, simplified the suggested compose setup to the API service only, and tightened the generated commit grouping.
+Built with Claude Code. A planning agent laid out the structure and pinned a known-good dependency set, then parallel build agents implemented separate lanes (the C# API with its Dockerfile and SQL, the pure TS core, the React components, the fast-check suites) against a contract I wrote by hand: `types.ts` plus exact function signatures. The reducer semantics, test invariants and design direction were mine, specified up front, and I verified everything through `make check`, `make api-test` and `make api-smoke`. I also overrode the agents in a few places: Next stays pinned at 15.5 rather than the default 16.x for tooling compatibility, the suggested compose setup got cut down to just the API service, and I regrouped the generated commits.
 
 ## What I'd do differently for production
 
-Real persistence (Postgres + the schema in `api/sql/schema.sql`) with optimistic concurrency surfaced as 409s; authn/authz and an audit trail with actor identity (which would also replace the hardcoded current analyst behind "Assigned to me"); status-transition state machine; wire the frontend to the API with optimistic updates; server-stored saved views shared across devices and teams; an SLA-aware sort key ("closest to breach first"); URL-synced filter state; virtualized table for >10k alerts; pagination on the list endpoint; Playwright e2e + CI (lint/test/build/image scan); OpenTelemetry; non-root container user. At production alert volumes I'd also pivot the top-level view from an alert queue to entity-ranked triage (which host/user is in the most trouble right now), with alerts grouped under the entities they affect.
+Persistence first: Postgres with the schema in `api/sql/schema.sql`, optimistic concurrency surfaced as 409s, and an audit trail with actor identity (which would also replace the hardcoded current analyst behind "Assigned to me"). Then authn/authz, a status-transition state machine, and actually wiring the frontend to the API with optimistic updates. On the product side: server-stored saved views shared across devices and teams, an SLA-aware sort key ("closest to breach first"), URL-synced filter state, a virtualized table for >10k alerts, and pagination on the list endpoint. Tooling: Playwright e2e and a CI pipeline (lint/test/build/image scan), OpenTelemetry, non-root container user. And at real alert volumes I'd rethink the top-level view entirely: rank entities (which host or user is in the most trouble right now) instead of listing raw alerts, with alerts grouped under the entities they affect.
 
 PRODUCTION: in a real system this endpoint would change in several ways:
 - Persistence: alerts live in Postgres (see api/sql/schema.sql), not a process-local dictionary.
