@@ -8,7 +8,12 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
-const STATUSES = ['open', 'acknowledged', 'resolved', 'false_positive'] as const;
+const STATUSES = [
+  'open',
+  'acknowledged',
+  'resolved',
+  'false_positive',
+] as const;
 const SOURCES = [
   'CrowdStrike EDR',
   'Okta',
@@ -102,7 +107,10 @@ const alerts = Array.from({ length: COUNT }, (_, i) => {
   const source = pick(SOURCES);
   const title = pick(TITLE_TEMPLATES[source])
     .replace('{host}', pick(HOSTS))
-    .replace('{user}', `${pick(ANALYSTS).split('.')[0]}.${pick(['w', 'm', 'k', 't'])}@corp.example`);
+    .replace(
+      '{user}',
+      `${pick(ANALYSTS).split('.')[0]}.${pick(['w', 'm', 'k', 't'])}@corp.example`,
+    );
   const status = pick(STATUSES);
   return {
     id: `AL-${String(i + 1).padStart(4, '0')}`,
