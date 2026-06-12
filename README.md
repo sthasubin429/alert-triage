@@ -5,16 +5,18 @@ A small Next.js + TypeScript page where a SOC analyst can triage ~200 mock secur
 ## Quickstart
 
 ```bash
-make up                      # docker compose: frontend http://localhost:3000 + API http://localhost:5080
+make setup                   # ground-up setup on a fresh machine (only Docker required)
+make up                      # build + start the full stack: frontend http://localhost:3000 + API http://localhost:5080
 make down                    # stop everything
-make check                   # lint + format check + typecheck + unit & property tests
-make api-test                # xunit integration tests (runs inside a .NET SDK container)
+make test                    # ALL tests: TypeScript unit/property + C# xunit (in Docker)
+make check                   # full gate: lint + format check + typecheck + all tests
+make build                   # build everything: frontend bundle + all Docker images
 make api-smoke               # build + run API in Docker, curl happy/sad paths
-make install && make dev     # local dev server with hot reload (optional)
+make dev                     # local dev server with hot reload (deps auto-install via npm ci)
 make help                    # everything else
 ```
 
-Only Docker is required to run the app — `make up` builds and starts both containers (frontend is a standalone Next.js production build; no local .NET or Node needed).
+Only Docker is required — `make setup` builds everything from scratch, `make up` runs both containers (the frontend is a standalone Next.js production build), and `make test` runs all tests (TypeScript tests fall back to the Docker build image when Node is absent). Local Node 20+ is only needed for `make dev` hot reload and the lint/format/typecheck targets.
 
 ## Key decisions & trade-offs
 

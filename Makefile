@@ -1,46 +1,75 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start test test-watch lint lint-fix format format-check typecheck data check \
+.PHONY: help setup dev build web-build start test test-web test-web-local test-watch lint lint-fix format format-check typecheck data check \
         api-build api-run api-test api-smoke up down logs clean
+
+## ---------- Setup ----------
+
+setup: ## Ground-up setup on a fresh machine — only Docker required
+	docker compose build
+	docker pull mcr.microsoft.com/dotnet/sdk:8.0
+	@if command -v node >/dev/null 2>&1; then \
+		$(MAKE) web/node_modules; \
+	else \
+		echo "node not found — skipped local npm ci (make up / make api-test still work; install Node 20+ for make dev/test-web/check)"; \
+	fi
+	@echo "setup complete — next: 'make up' (run the stack) or 'make test' (run all tests)"
 
 ## ---------- Frontend (web/) ----------
 
-install: ## Install frontend dependencies
-	cd web && npm install
+# Reproducible, lockfile-exact install; runs automatically when node_modules
+# is missing or the lockfile changed.
+web/node_modules: web/package.json web/package-lock.json
+	cd web && npm ci
+	@touch web/node_modules
 
-dev: ## Run Next.js dev server (http://localhost:3000)
+dev: web/node_modules ## Run Next.js dev server (http://localhost:3000)
 	cd web && npm run dev
 
-build: ## Production build of the frontend
+build: web-build ## Build everything: frontend bundle + all Docker images
+	docker compose build
+
+web-build: web/node_modules ## Production build of the frontend only
 	cd web && npm run build
 
-start: ## Serve the production build
+start: web/node_modules ## Serve the production build
 	cd web && npm run start
 
-test: ## Run TypeScript unit + property-based tests once
+test: test-web api-test ## Run ALL tests: TypeScript + C# xunit (in Docker)
+
+test-web: ## TypeScript unit + property-based tests (falls back to Docker without Node)
+	@if command -v node >/dev/null 2>&1; then \
+		$(MAKE) test-web-local; \
+	else \
+		echo "node not found — running TypeScript tests inside the web build image"; \
+		docker build --target build -t alerts-web-build ./web; \
+		docker run --rm alerts-web-build npm run test; \
+	fi
+
+test-web-local: web/node_modules
 	cd web && npm run test
 
-test-watch: ## Run tests in watch mode
+test-watch: web/node_modules ## Run tests in watch mode
 	cd web && npm run test:watch
 
-lint: ## Lint the frontend
+lint: web/node_modules ## Lint the frontend
 	cd web && npm run lint
 
-lint-fix: ## Lint and auto-fix
+lint-fix: web/node_modules ## Lint and auto-fix
 	cd web && npm run lint:fix
 
-format: ## Format all frontend files with Prettier
+format: web/node_modules ## Format all frontend files with Prettier
 	cd web && npm run format
 
-format-check: ## Check formatting without writing
+format-check: web/node_modules ## Check formatting without writing
 	cd web && npm run format:check
 
-typecheck: ## TypeScript type check (no emit)
+typecheck: web/node_modules ## TypeScript type check (no emit)
 	cd web && npm run typecheck
 
-data: ## Regenerate the seeded mock alerts JSON (deterministic)
+data: web/node_modules ## Regenerate the seeded mock alerts JSON (deterministic)
 	cd web && npm run data
 
-check: lint format-check typecheck test ## Full local quality gate
+check: lint format-check typecheck test ## Full quality gate: lint + format + types + all tests
 
 ## ---------- C# API (api/, Docker only — no local dotnet needed) ----------
 
