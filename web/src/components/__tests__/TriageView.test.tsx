@@ -26,7 +26,8 @@ const FIXTURE: Alert[] = [
     status: 'open',
     source: 'Okta',
     createdAt: minutesAgo(30),
-    assignee: 'mira.chen',
+    // CURRENT_ANALYST: the "Assigned to me" built-in view matches this row.
+    assignee: 'maya.chen',
   },
   {
     id: 'AL-1003',
@@ -66,7 +67,11 @@ function rowOf(title: string): HTMLElement {
 }
 
 // RTL auto-cleanup needs vitest globals; this config does not enable them.
-afterEach(cleanup);
+// localStorage persists across tests in a file (saved views, column widths).
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+});
 
 describe('TriageView', () => {
   it('renders one row per alert in the fixture', () => {
@@ -189,20 +194,19 @@ describe('TriageView', () => {
     const user = userEvent.setup();
     render(<TriageView initialAlerts={FIXTURE} />);
     const firstTitle = 'Alpha beacon to known C2 infrastructure';
-    const statusGroup = screen.getByRole('group', { name: 'Filter by status' });
-    const openPill = within(statusGroup).getByRole('button', { name: 'open' });
 
-    await user.click(openPill);
-    openPill.blur(); // hotkeys no-op while a button has focus
-    await user.keyboard('j');
-    await user.keyboard('a'); // acknowledge: row leaves the "open" filter
+    await user.keyboard('j'); // select Alpha
+    expect(rowOf(firstTitle)).toHaveAttribute('aria-selected', 'true');
 
+    await user.type(screen.getByRole('searchbox'), 'Bravo');
+    await user.keyboard('{Escape}'); // blur search; Alpha is selected but not visible
     const table = screen.getByRole('table');
     expect(within(table).queryByText(firstTitle)).not.toBeInTheDocument();
+
     await user.keyboard('r'); // must no-op: selected row is not visible
 
-    await user.click(openPill); // toggle the filter back off
-    expect(within(rowOf(firstTitle)).getByText('ack')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(within(rowOf(firstTitle)).getByText('open')).toBeInTheDocument();
     expect(
       within(rowOf(firstTitle)).queryByText('resolved'),
     ).not.toBeInTheDocument();
@@ -248,11 +252,264 @@ describe('TriageView', () => {
     screen.getByRole('button', { name: 'Severity' }).focus();
     await user.keyboard('{Enter}');
 
+    // the resize handle's aria-label is part of the columnheader's name
     expect(
-      screen.getByRole('columnheader', { name: 'Severity' }),
+      screen.getByRole('columnheader', { name: /^Severity/ }),
     ).toHaveAttribute('aria-sort', 'descending');
     expect(
       screen.queryByRole('dialog', { name: 'Alert detail' }),
     ).not.toBeInTheDocument();
+  });
+});
+
+function tablist(): HTMLElement {
+  return screen.getByRole('tablist', { name: 'Saved views' });
+}
+
+function activeTabs(): HTMLElement[] {
+  return within(tablist())
+    .getAllByRole('tab')
+    .filter((tab) => tab.getAttribute('aria-selected') === 'true');
+}
+
+describe('TriageView saved views', () => {
+  it('renders the built-in tabs with All alerts active and no delete buttons', () => {
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const tabs = within(tablist()).getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(within(tabs[0]).getByText('All alerts')).toBeInTheDocument();
+    expect(
+      within(tablist()).queryByRole('button', { name: /Delete view/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clicking a tab applies its query; All alerts restores everything', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.click(screen.getByRole('button', { name: /Assigned to me/ }));
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('1 of 5');
+    expect(
+      screen.getByText('Bravo impossible-travel login for j.doe'),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Hot queue/ }));
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('2 of 5');
+
+    await user.click(screen.getByRole('button', { name: /All alerts/ }));
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('5 of 5');
+  });
+
+  it('switches views with number hotkeys', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.keyboard('2');
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('2 of 5');
+    expect(activeTabs()).toHaveLength(1);
+    expect(within(activeTabs()[0]).getByText('Hot queue')).toBeInTheDocument();
+
+    await user.keyboard('1');
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('5 of 5');
+  });
+
+  it('changing a filter deselects the active tab (dirty query)', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const severityGroup = screen.getByRole('group', {
+      name: 'Filter by severity',
+    });
+
+    await user.click(
+      within(severityGroup).getByRole('button', { name: 'critical' }),
+    );
+    expect(activeTabs()).toHaveLength(0);
+  });
+
+  it('typing a digit in the search box does not switch views', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.type(screen.getByRole('searchbox'), '2');
+    // an APPLY_VIEW would have reset the search and activated Hot queue
+    expect(screen.getByRole('searchbox')).toHaveValue('2');
+    expect(activeTabs()).toHaveLength(0);
+  });
+
+  it('saves the current query as a named view and re-applies it', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const severityGroup = screen.getByRole('group', {
+      name: 'Filter by severity',
+    });
+
+    await user.click(
+      within(severityGroup).getByRole('button', { name: 'critical' }),
+    );
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('1 of 5');
+
+    await user.click(screen.getByRole('button', { name: 'Save current view' }));
+    await user.type(screen.getByLabelText('View name'), 'crit only');
+    await user.keyboard('{Enter}');
+
+    expect(activeTabs()).toHaveLength(1);
+    expect(within(activeTabs()[0]).getByText('crit only')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('5 of 5');
+
+    // exact: /crit only/ would also match the "Delete view crit only" button
+    const critTab = within(tablist()).getByRole('button', {
+      name: 'crit only',
+    });
+    await user.click(critTab);
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('1 of 5');
+  });
+
+  it('rejects empty and duplicate view names with an inline error', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.click(screen.getByRole('button', { name: 'Save current view' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter a name');
+
+    await user.type(screen.getByLabelText('View name'), 'all ALERTS');
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('alert')).toHaveTextContent('Name already in use');
+    expect(within(tablist()).getAllByRole('tab')).toHaveLength(3);
+  });
+
+  it('persists custom views across a remount via localStorage', async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.click(screen.getByRole('button', { name: 'Save current view' }));
+    await user.type(screen.getByLabelText('View name'), 'my shift');
+    await user.keyboard('{Enter}');
+    expect(
+      within(tablist()).getByRole('button', { name: 'my shift' }),
+    ).toBeInTheDocument();
+
+    unmount();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    expect(
+      within(tablist()).getByRole('button', { name: 'my shift' }),
+    ).toBeInTheDocument();
+  });
+
+  it('deletes a custom view and falls back to All alerts when it was active', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.keyboard('2'); // Hot queue: a non-default query to capture
+    await user.click(screen.getByRole('button', { name: 'Save current view' }));
+    await user.type(screen.getByLabelText('View name'), 'doomed');
+    await user.keyboard('{Enter}');
+    expect(activeTabs()).toHaveLength(1);
+
+    await user.click(
+      within(tablist()).getByRole('button', { name: 'Delete view doomed' }),
+    );
+    expect(
+      within(tablist()).queryByRole('button', { name: /doomed/ }),
+    ).not.toBeInTheDocument();
+    expect(within(activeTabs()[0]).getByText('All alerts')).toBeInTheDocument();
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('5 of 5');
+  });
+});
+
+describe('TriageView auto-advance and undo', () => {
+  it('a status hotkey advances the selection to the next visible row', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const alpha = 'Alpha beacon to known C2 infrastructure';
+    const bravo = 'Bravo impossible-travel login for j.doe';
+
+    await user.keyboard('j'); // select Alpha (first row)
+    await user.keyboard('a');
+
+    expect(within(rowOf(alpha)).getByText('ack')).toBeInTheDocument();
+    expect(rowOf(bravo)).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('disposing the last visible row selects the previous one', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const delta = 'Delta phishing campaign targeting finance';
+    const echo = 'Echo lateral SMB scanning from WS-ENG-042';
+
+    await user.keyboard('k'); // from nothing, k selects the last row (Echo)
+    expect(rowOf(echo)).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('o'); // re-open the false positive
+    expect(within(rowOf(echo)).getByText('open')).toBeInTheDocument();
+    expect(rowOf(delta)).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('disposing the only visible row clears the selection', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.type(screen.getByRole('searchbox'), 'Alpha');
+    await user.keyboard('{Escape}'); // blur the search box
+    await user.keyboard('j');
+    await user.keyboard('a');
+
+    const tbodyRows = screen
+      .getAllByRole('row')
+      .filter((row) => row.closest('tbody'));
+    expect(tbodyRows).toHaveLength(1); // Alpha still matches the search
+    for (const row of tbodyRows) {
+      expect(row).toHaveAttribute('aria-selected', 'false');
+    }
+  });
+
+  it('disposing from the drawer does not move the selection', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const bravo = 'Bravo impossible-travel login for j.doe';
+
+    await user.click(screen.getByText(bravo));
+    const dialog = screen.getByRole('dialog', { name: 'Alert detail' });
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Acknowledged' }),
+    );
+
+    expect(rowOf(bravo)).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('shows an undo toast after a hotkey disposition and u reverts it', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const alpha = 'Alpha beacon to known C2 infrastructure';
+
+    await user.keyboard('j');
+    await user.keyboard('a');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'AL-1001 → acknowledged — press u to undo',
+    );
+
+    await user.keyboard('u');
+    expect(within(rowOf(alpha)).getByText('open')).toBeInTheDocument();
+    expect(rowOf(alpha)).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('status')).toHaveTextContent('');
+  });
+
+  it('undo unwinds multiple changes in reverse order', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const alpha = 'Alpha beacon to known C2 infrastructure';
+    const bravo = 'Bravo impossible-travel login for j.doe';
+
+    await user.keyboard('j'); // Alpha
+    await user.keyboard('a'); // ack Alpha, advance to Bravo
+    await user.keyboard('r'); // resolve Bravo
+
+    await user.keyboard('u'); // Bravo back to open
+    expect(within(rowOf(bravo)).getByText('open')).toBeInTheDocument();
+    await user.keyboard('u'); // Alpha back to open
+    expect(within(rowOf(alpha)).getByText('open')).toBeInTheDocument();
   });
 });

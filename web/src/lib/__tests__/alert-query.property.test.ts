@@ -9,6 +9,7 @@ import {
 import { EMPTY_FILTER } from '@/lib/types';
 import type { Alert, AlertFilter, Severity, SortKey } from '@/lib/types';
 import {
+  ASSIGNEE_POOL,
   alertArb,
   alertsArb,
   filterArb,
@@ -42,7 +43,9 @@ function satisfiesFilter(alert: Alert, filter: AlertFilter): boolean {
     (filter.severity.length === 0 ||
       filter.severity.includes(alert.severity)) &&
     (filter.status.length === 0 || filter.status.includes(alert.status)) &&
-    (filter.source.length === 0 || filter.source.includes(alert.source))
+    (filter.source.length === 0 || filter.source.includes(alert.source)) &&
+    (filter.assignee.length === 0 ||
+      (alert.assignee !== null && filter.assignee.includes(alert.assignee)))
   );
 }
 
@@ -169,6 +172,41 @@ describe('filterAlerts', () => {
         alerts.forEach((alert, i) => expect(alert).toBe(refs[i]));
         expect(alerts).toEqual(snapshot);
       }),
+    );
+  });
+
+  it('an unassigned alert never survives a non-empty assignee criterion', () => {
+    fc.assert(
+      fc.property(
+        alertsArb,
+        fc.array(fc.string({ minLength: 1 }), { minLength: 1, maxLength: 3 }),
+        (alerts, assignee) => {
+          const result = filterAlerts(alerts, {
+            ...EMPTY_FILTER,
+            assignee,
+          });
+          for (const alert of result) {
+            expect(alert.assignee).not.toBeNull();
+          }
+        },
+      ),
+    );
+  });
+
+  it('an alert whose assignee is in the criterion survives an assignee-only filter', () => {
+    fc.assert(
+      fc.property(
+        alertsArb,
+        fc.subarray(ASSIGNEE_POOL, { minLength: 1 }),
+        (alerts, assignee) => {
+          const result = filterAlerts(alerts, { ...EMPTY_FILTER, assignee });
+          for (const alert of alerts) {
+            if (alert.assignee !== null && assignee.includes(alert.assignee)) {
+              expect(result).toContain(alert);
+            }
+          }
+        },
+      ),
     );
   });
 });

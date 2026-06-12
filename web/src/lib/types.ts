@@ -42,15 +42,19 @@ export interface AlertFilter {
   severity: readonly Severity[];
   status: readonly Status[];
   source: readonly Source[];
+  /** Matches by exact assignee; an unassigned alert never matches a non-empty criterion. */
+  assignee: readonly string[];
 }
 
 export const EMPTY_FILTER: AlertFilter = {
   severity: [],
   status: [],
   source: [],
+  assignee: [],
 };
 
 export type FilterToggle =
   | { key: 'severity'; value: Severity }
   | { key: 'status'; value: Status }
-  | { key: 'source'; value: Source };
+  | { key: 'source'; value: Source }
+  | { key: 'assignee'; value: string };

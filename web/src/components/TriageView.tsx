@@ -3,11 +3,21 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { EMPTY_FILTER, type Alert, type Status } from '@/lib/types';
 import { applyQuery } from '@/lib/alert-query';
+import { parseStoredViews, serializeViews } from '@/lib/saved-views';
 import { isStale } from '@/lib/staleness';
-import { initialTriageState, triageReducer } from '@/lib/triage-reducer';
+import {
+  initialTriageState,
+  triageReducer,
+  type StatusChange,
+} from '@/lib/triage-reducer';
 import AlertTable from '@/components/AlertTable';
 import DetailDrawer from '@/components/DetailDrawer';
 import FilterBar from '@/components/FilterBar';
+import UndoToast from '@/components/UndoToast';
+import ViewTabs from '@/components/ViewTabs';
+
+const VIEWS_KEY = 'triage.savedViews.v1';
+const TOAST_MS = 4000;
 
 const STATUS_KEYS: Record<string, Status> = {
   a: 'acknowledged',
@@ -23,6 +33,8 @@ const HINTS: { keys: string; action: string }[] = [
   { keys: 'r', action: 'resolve' },
   { keys: 'f', action: 'false pos' },
   { keys: 'o', action: 're-open' },
+  { keys: 'u', action: 'undo' },
+  { keys: '1-9', action: 'views' },
   { keys: '/', action: 'search' },
   { keys: 'esc', action: 'close' },
 ];
@@ -48,13 +60,42 @@ export default function TriageView({
     initialTriageState,
   );
   const [now, setNow] = useState<number | null>(null);
+  const [toast, setToast] = useState<StatusChange | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const persistViews = useRef(false);
 
   useEffect(() => {
     setNow(Date.now());
     const interval = setInterval(() => setNow(Date.now()), 30_000);
     return () => clearInterval(interval);
   }, []);
+
+  // Hydrate analyst-created views after mount (never during render — the
+  // server HTML only knows the built-ins).
+  useEffect(() => {
+    const stored = parseStoredViews(window.localStorage.getItem(VIEWS_KEY));
+    if (stored.length > 0) {
+      dispatch({ type: 'HYDRATE_VIEWS', views: stored });
+    }
+  }, []);
+
+  // Persist custom views. The mount run is skipped: it fires before the
+  // hydration dispatch lands and would wipe what's stored.
+  useEffect(() => {
+    if (!persistViews.current) {
+      persistViews.current = true;
+      return;
+    }
+    window.localStorage.setItem(VIEWS_KEY, serializeViews(state.views));
+  }, [state.views]);
+
+  // Mirror the reducer's last status change into a self-dismissing toast.
+  useEffect(() => {
+    setToast(state.lastStatusChange);
+    if (state.lastStatusChange === null) return;
+    const timer = setTimeout(() => setToast(null), TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [state.lastStatusChange]);
 
   const { filter, search, sort, selectedId } = state;
 
@@ -99,6 +140,15 @@ export default function TriageView({
         return;
       }
 
+      if (event.key >= '1' && event.key <= '9') {
+        const view = state.views[Number(event.key) - 1];
+        if (view !== undefined) {
+          event.preventDefault();
+          dispatch({ type: 'APPLY_VIEW', id: view.id });
+        }
+        return;
+      }
+
       const visibleIds = visible.map((a) => a.id);
       switch (event.key) {
         case 'j':
@@ -116,13 +166,21 @@ export default function TriageView({
             dispatch({ type: 'SELECT', id: selectedId });
           }
           return;
+        case 'u':
+          dispatch({ type: 'UNDO' });
+          return;
         default: {
           const status = STATUS_KEYS[event.key];
-          if (
-            status !== undefined &&
-            selectedId !== null &&
-            (visibleIds.includes(selectedId) || state.drawerOpen)
-          ) {
+          if (status === undefined || selectedId === null) return;
+          if (visibleIds.includes(selectedId)) {
+            // Hotkey disposition advances to the next alert in the queue.
+            dispatch({
+              type: 'SET_STATUS',
+              id: selectedId,
+              status,
+              advanceWithin: visibleIds,
+            });
+          } else if (state.drawerOpen) {
             dispatch({ type: 'SET_STATUS', id: selectedId, status });
           }
         }
@@ -131,7 +189,7 @@ export default function TriageView({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [visible, selectedId, state.drawerOpen]);
+  }, [visible, selectedId, state.drawerOpen, state.views]);
 
   return (
     <div className="flex h-dvh flex-col">
@@ -149,6 +207,14 @@ export default function TriageView({
           SOC console / mini-view
         </span>
       </header>
+
+      <ViewTabs
+        views={state.views}
+        activeViewId={state.activeViewId}
+        onSelect={(id) => dispatch({ type: 'APPLY_VIEW', id })}
+        onDelete={(id) => dispatch({ type: 'DELETE_VIEW', id })}
+        onSave={(name) => dispatch({ type: 'SAVE_VIEW', name })}
+      />
 
       <FilterBar
         filter={filter}
@@ -198,6 +264,8 @@ export default function TriageView({
           dispatch({ type: 'SET_STATUS', id, status })
         }
       />
+
+      <UndoToast change={toast} />
     </div>
   );
 }

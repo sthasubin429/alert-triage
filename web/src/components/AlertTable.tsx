@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { Alert, SortKey, SortSpec } from '@/lib/types';
 import { formatAge, isStale, slaRatio } from '@/lib/staleness';
 import SeverityBadge from '@/components/SeverityBadge';
@@ -15,13 +16,53 @@ interface AlertTableProps {
   onSelect: (id: string) => void;
 }
 
-const COLUMNS: { key: SortKey; label: string; className?: string }[] = [
-  { key: 'severity', label: 'Severity', className: 'w-28' },
+const COLUMNS: { key: SortKey; label: string }[] = [
+  { key: 'severity', label: 'Severity' },
   { key: 'title', label: 'Title' },
-  { key: 'source', label: 'Source', className: 'w-36' },
-  { key: 'status', label: 'Status', className: 'w-28' },
-  { key: 'createdAt', label: 'Age', className: 'w-24' },
+  { key: 'source', label: 'Source' },
+  { key: 'status', label: 'Status' },
+  { key: 'createdAt', label: 'Age' },
 ];
+
+/** Title has no entry: it absorbs whatever width the others leave over. */
+type ResizableColumn = Exclude<SortKey, 'title'> | 'assignee';
+
+const DEFAULT_WIDTHS: Record<ResizableColumn, number> = {
+  severity: 112,
+  source: 144,
+  status: 112,
+  createdAt: 96,
+  assignee: 128,
+};
+
+const WIDTHS_KEY = 'triage.columnWidths.v1';
+const MIN_WIDTH = 60;
+const MAX_WIDTH = 600;
+
+function clampWidth(value: number): number {
+  return Math.min(Math.max(value, MIN_WIDTH), MAX_WIDTH);
+}
+
+function parseStoredWidths(
+  raw: string | null,
+): Record<ResizableColumn, number> | null {
+  if (raw === null) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== 'object' || parsed === null) return null;
+  const widths = { ...DEFAULT_WIDTHS };
+  for (const key of Object.keys(DEFAULT_WIDTHS) as ResizableColumn[]) {
+    const value = (parsed as Record<string, unknown>)[key];
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      widths[key] = clampWidth(value);
+    }
+  }
+  return widths;
+}
 
 export default function AlertTable({
   alerts,
@@ -32,6 +73,13 @@ export default function AlertTable({
   onSelect,
 }: AlertTableProps) {
   const rowRefs = useRef(new Map<string, HTMLTableRowElement>());
+  const [widths, setWidths] = useState(DEFAULT_WIDTHS);
+  const widthsRef = useRef(widths);
+  const dragRef = useRef<{
+    column: ResizableColumn;
+    startX: number;
+    startWidth: number;
+  } | null>(null);
 
   useEffect(() => {
     if (selectedId === null) return;
@@ -39,8 +87,71 @@ export default function AlertTable({
     el?.scrollIntoView?.({ block: 'nearest' });
   }, [selectedId]);
 
+  // Hydrate persisted widths after mount (never during render — SSR HTML
+  // only knows the defaults).
+  useEffect(() => {
+    const stored = parseStoredWidths(window.localStorage.getItem(WIDTHS_KEY));
+    if (stored !== null) setWidths(stored);
+  }, []);
+
+  useEffect(() => {
+    widthsRef.current = widths;
+  }, [widths]);
+
+  const startResize =
+    (column: ResizableColumn) => (event: ReactPointerEvent<HTMLElement>) => {
+      // Keep the drag from reaching the sort button or selecting text.
+      event.preventDefault();
+      event.stopPropagation();
+      // Guarded: jsdom has no pointer capture.
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      dragRef.current = {
+        column,
+        startX: event.clientX,
+        startWidth: widthsRef.current[column],
+      };
+    };
+
+  const moveResize = (event: ReactPointerEvent<HTMLElement>) => {
+    const drag = dragRef.current;
+    if (drag === null) return;
+    const width = clampWidth(drag.startWidth + event.clientX - drag.startX);
+    setWidths((prev) =>
+      prev[drag.column] === width ? prev : { ...prev, [drag.column]: width },
+    );
+  };
+
+  const endResize = (event: ReactPointerEvent<HTMLElement>) => {
+    if (dragRef.current === null) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    dragRef.current = null;
+    window.localStorage.setItem(WIDTHS_KEY, JSON.stringify(widthsRef.current));
+  };
+
+  const resizeHandle = (column: ResizableColumn, label: string) => (
+    <span
+      role="separator"
+      aria-orientation="vertical"
+      aria-label={`Resize ${label} column`}
+      onPointerDown={startResize(column)}
+      onPointerMove={moveResize}
+      onPointerUp={endResize}
+      className="absolute -right-1 top-0 h-full w-2 cursor-col-resize touch-none select-none hover:bg-accent/40"
+    />
+  );
+
   return (
-    <table className="w-full border-collapse text-left text-[13px]">
+    <table className="w-full table-fixed border-collapse text-left text-[13px]">
+      <colgroup>
+        {COLUMNS.map((col) => (
+          <col
+            key={col.key}
+            data-column={col.key}
+            style={col.key === 'title' ? undefined : { width: widths[col.key] }}
+          />
+        ))}
+        <col data-column="assignee" style={{ width: widths.assignee }} />
+      </colgroup>
       <thead className="sticky top-0 z-10">
         <tr className="border-b border-edge bg-panel shadow-[0_1px_0_0_var(--color-edge)]">
           {COLUMNS.map((col) => {
@@ -56,7 +167,7 @@ export default function AlertTable({
                       : 'descending'
                     : undefined
                 }
-                className={`px-3 py-0 ${col.className ?? ''}`}
+                className="relative px-3 py-0"
               >
                 <button
                   type="button"
@@ -73,14 +184,16 @@ export default function AlertTable({
                     {active && sort.direction === 'asc' ? '↑' : '↓'}
                   </span>
                 </button>
+                {col.key !== 'title' && resizeHandle(col.key, col.label)}
               </th>
             );
           })}
           <th
             scope="col"
-            className="w-32 px-3 py-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-faint"
+            className="relative px-3 py-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-faint"
           >
-            Assignee
+            <span className="flex h-8 items-center">Assignee</span>
+            {resizeHandle('assignee', 'Assignee')}
           </th>
         </tr>
       </thead>
@@ -139,7 +252,7 @@ export default function AlertTable({
                 <td className="px-3 py-1.5">
                   <SeverityBadge severity={alert.severity} variant="plain" />
                 </td>
-                <td className="w-full max-w-0 truncate px-3 py-1.5">
+                <td className="truncate px-3 py-1.5">
                   <span className="mr-2 font-mono text-[11px] text-dim">
                     {alert.id}
                   </span>

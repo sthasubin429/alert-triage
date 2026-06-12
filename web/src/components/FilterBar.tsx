@@ -9,6 +9,7 @@ import {
   type FilterToggle,
   type Status,
 } from '@/lib/types';
+import { CURRENT_ANALYST } from '@/lib/saved-views';
 
 interface FilterBarProps {
   filter: AlertFilter;
@@ -83,7 +84,8 @@ export default function FilterBar({
     search.trim() !== '' ||
     filter.severity.length > 0 ||
     filter.status.length > 0 ||
-    filter.source.length > 0;
+    filter.source.length > 0 ||
+    filter.assignee.length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-edge bg-panel px-3 py-2">
@@ -126,6 +128,14 @@ export default function FilterBar({
         values={SOURCES}
         active={filter.source}
         onToggle={(value) => onToggleFilter({ key: 'source', value })}
+      />
+
+      <FilterGroup
+        label="assignee"
+        values={[CURRENT_ANALYST]}
+        active={filter.assignee}
+        format={() => 'mine'}
+        onToggle={(value) => onToggleFilter({ key: 'assignee', value })}
       />
 
       {anyActive && (

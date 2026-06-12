@@ -22,7 +22,9 @@ export function filterAlerts(
       (filter.severity.length === 0 ||
         filter.severity.includes(alert.severity)) &&
       (filter.status.length === 0 || filter.status.includes(alert.status)) &&
-      (filter.source.length === 0 || filter.source.includes(alert.source)),
+      (filter.source.length === 0 || filter.source.includes(alert.source)) &&
+      (filter.assignee.length === 0 ||
+        (alert.assignee !== null && filter.assignee.includes(alert.assignee))),
   );
 }
 

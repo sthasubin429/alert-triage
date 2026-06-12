@@ -1,12 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { initialTriageState, triageReducer } from '@/lib/triage-reducer';
-import type { TriageState } from '@/lib/triage-reducer';
+import {
+  UNDO_LIMIT,
+  initialTriageState,
+  triageReducer,
+} from '@/lib/triage-reducer';
+import type { TriageAction, TriageState } from '@/lib/triage-reducer';
+import { builtinViews } from '@/lib/saved-views';
 import { SEVERITIES, SOURCES, STATUSES } from '@/lib/types';
 import type { Alert } from '@/lib/types';
 import {
   alertArb,
+  customViewsArb,
   filterArb,
+  savedViewQueryArb,
   sortDirectionArb,
   sortKeyArb,
   sortSpecArb,
@@ -25,10 +32,11 @@ function deepFreeze<T>(value: T): T {
 
 function makeState(alerts: readonly Alert[]): TriageState {
   // Clone the filter so deep-freezing a state never freezes the shared
-  // EMPTY_FILTER module constant.
+  // EMPTY_FILTER module constant. (Views need no clone: builtinViews() is
+  // a factory returning fresh objects.)
   return {
     ...initialTriageState(alerts),
-    filter: { severity: [], status: [], source: [] },
+    filter: { severity: [], status: [], source: [], assignee: [] },
   };
 }
 
@@ -121,6 +129,161 @@ describe('triageReducer SET_STATUS', () => {
         ).not.toThrow();
       }),
       { numRuns: 50 },
+    );
+  });
+
+  it('returns the same state reference when the status is unchanged', () => {
+    fc.assert(
+      fc.property(nonEmptyUniqueAlertsArb, fc.nat(), (alerts, seed) => {
+        const index = seed % alerts.length;
+        const state = makeState(alerts);
+        const next = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status: alerts[index].status,
+        });
+        expect(next).toBe(state);
+      }),
+    );
+  });
+
+  it('a real change pushes {id, from, to} and records lastStatusChange', () => {
+    fc.assert(
+      fc.property(setStatusCaseArb, ([alerts, index, status]) => {
+        fc.pre(alerts[index].status !== status);
+        const state = makeState(alerts);
+        const next = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+        });
+        const change = {
+          id: alerts[index].id,
+          from: alerts[index].status,
+          to: status,
+        };
+        expect(next.undoStack).toEqual([change]);
+        expect(next.lastStatusChange).toEqual(change);
+      }),
+    );
+  });
+
+  it('caps the undo stack at UNDO_LIMIT, keeping the most recent entries', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.constantFrom(...STATUSES), {
+          minLength: UNDO_LIMIT + 5,
+          maxLength: UNDO_LIMIT + 10,
+        }),
+        (statuses) => {
+          const alert: Alert = {
+            id: 'cap-1',
+            title: 'cap',
+            severity: 'low',
+            status: 'open',
+            source: 'Okta',
+            createdAt: '2024-06-01T12:00:00.000Z',
+            assignee: null,
+          };
+          let state = makeState([alert]);
+          const pushed: string[] = [];
+          for (const status of statuses) {
+            const before = state.alerts[0].status;
+            state = triageReducer(state, {
+              type: 'SET_STATUS',
+              id: alert.id,
+              status,
+            });
+            if (before !== status) pushed.push(`${before}->${status}`);
+          }
+          expect(state.undoStack.length).toBeLessThanOrEqual(UNDO_LIMIT);
+          expect(state.undoStack.map((e) => `${e.from}->${e.to}`)).toEqual(
+            pushed.slice(-UNDO_LIMIT),
+          );
+        },
+      ),
+      { numRuns: 25 },
+    );
+  });
+});
+
+describe('triageReducer SET_STATUS auto-advance', () => {
+  /** (alerts with a real status change, target index, new status) */
+  const advanceCaseArb = setStatusCaseArb.filter(
+    ([alerts, index, status]) => alerts[index].status !== status,
+  );
+
+  it('advances to the next visible id (previous when last, null when only)', () => {
+    fc.assert(
+      fc.property(advanceCaseArb, ([alerts, index, status]) => {
+        const visibleIds = alerts.map((a) => a.id);
+        const state = { ...makeState(alerts), selectedId: alerts[index].id };
+        const next = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+          advanceWithin: visibleIds,
+        });
+        const expected =
+          visibleIds.length === 1
+            ? null
+            : visibleIds[
+                index === visibleIds.length - 1 ? index - 1 : index + 1
+              ];
+        expect(next.selectedId).toBe(expected);
+      }),
+    );
+  });
+
+  it('leaves selection unchanged when the disposed alert is not selected', () => {
+    fc.assert(
+      fc.property(
+        advanceCaseArb,
+        fc.option(fc.string(), { nil: null }),
+        ([alerts, index, status], selectedId) => {
+          fc.pre(selectedId !== alerts[index].id);
+          const state = { ...makeState(alerts), selectedId };
+          const next = triageReducer(state, {
+            type: 'SET_STATUS',
+            id: alerts[index].id,
+            status,
+            advanceWithin: alerts.map((a) => a.id),
+          });
+          expect(next.selectedId).toBe(selectedId);
+        },
+      ),
+    );
+  });
+
+  it('leaves selection unchanged when advanceWithin is absent', () => {
+    fc.assert(
+      fc.property(advanceCaseArb, ([alerts, index, status]) => {
+        const state = { ...makeState(alerts), selectedId: alerts[index].id };
+        const next = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+        });
+        expect(next.selectedId).toBe(alerts[index].id);
+      }),
+    );
+  });
+
+  it('leaves selection unchanged when the disposed id is not in advanceWithin', () => {
+    fc.assert(
+      fc.property(advanceCaseArb, ([alerts, index, status]) => {
+        const others = alerts
+          .filter((a) => a.id !== alerts[index].id)
+          .map((a) => a.id);
+        const state = { ...makeState(alerts), selectedId: alerts[index].id };
+        const next = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+          advanceWithin: others,
+        });
+        expect(next.selectedId).toBe(alerts[index].id);
+      }),
     );
   });
 });
@@ -274,6 +437,7 @@ describe('triageReducer SET_FILTER / TOGGLE_FILTER / SET_SEARCH', () => {
       severity: fc.subarray([...SEVERITIES]),
       status: fc.subarray([...STATUSES]),
       source: fc.subarray([...SOURCES]),
+      assignee: fc.array(fc.string({ minLength: 1 }), { maxLength: 3 }),
     },
     { requiredKeys: [] },
   );
@@ -290,6 +454,10 @@ describe('triageReducer SET_FILTER / TOGGLE_FILTER / SET_SEARCH', () => {
     fc.record({
       key: fc.constant('source' as const),
       value: fc.constantFrom(...SOURCES),
+    }),
+    fc.record({
+      key: fc.constant('assignee' as const),
+      value: fc.string({ minLength: 1 }),
     }),
   );
 
@@ -330,8 +498,13 @@ describe('triageReducer SET_FILTER / TOGGLE_FILTER / SET_SEARCH', () => {
             expect(filter[toggle.key] as readonly string[]).toContain(other);
           }
         }
-        // the two untouched criteria are reference-equal
-        for (const key of ['severity', 'status', 'source'] as const) {
+        // the untouched criteria are reference-equal
+        for (const key of [
+          'severity',
+          'status',
+          'source',
+          'assignee',
+        ] as const) {
           if (key !== toggle.key) {
             expect(next.filter[key]).toBe(filter[key]);
           }
@@ -353,17 +526,43 @@ describe('triageReducer SET_FILTER / TOGGLE_FILTER / SET_SEARCH', () => {
     );
   });
 
-  it('SET_SEARCH sets search and leaves everything else untouched', () => {
+  it('SET_SEARCH sets search, clears the active view, and leaves the rest untouched', () => {
     fc.assert(
       fc.property(uniqueAlertsArb, fc.string(), (alerts, search) => {
         const state = makeState(alerts);
         const next = triageReducer(state, { type: 'SET_SEARCH', search });
         expect(next.search).toBe(search);
+        expect(next.activeViewId).toBeNull();
         expect(next.alerts).toBe(state.alerts);
         expect(next.filter).toBe(state.filter);
         expect(next.sort).toBe(state.sort);
         expect(next.selectedId).toBe(state.selectedId);
         expect(next.drawerOpen).toBe(state.drawerOpen);
+        expect(next.views).toBe(state.views);
+        expect(next.undoStack).toBe(state.undoStack);
+        expect(next.lastStatusChange).toBe(state.lastStatusChange);
+      }),
+    );
+  });
+
+  it('every query-changing action clears the active view id', () => {
+    const queryActionArb: fc.Arbitrary<TriageAction> = fc.oneof(
+      partialFilterArb.map(
+        (filter): TriageAction => ({ type: 'SET_FILTER', filter }),
+      ),
+      filterToggleArb.map(
+        (toggle): TriageAction => ({ type: 'TOGGLE_FILTER', ...toggle }),
+      ),
+      fc
+        .string()
+        .map((search): TriageAction => ({ type: 'SET_SEARCH', search })),
+      sortKeyArb.map((key): TriageAction => ({ type: 'SET_SORT', key })),
+    );
+    fc.assert(
+      fc.property(queryActionArb, (action) => {
+        const state = makeState([]);
+        expect(state.activeViewId).not.toBeNull();
+        expect(triageReducer(state, action).activeViewId).toBeNull();
       }),
     );
   });
@@ -416,6 +615,369 @@ describe('triageReducer SELECT / CLOSE_DRAWER', () => {
   });
 });
 
+describe('triageReducer APPLY_VIEW', () => {
+  it('applies the view query, marks it active, and touches nothing else', () => {
+    fc.assert(
+      fc.property(
+        uniqueAlertsArb,
+        customViewsArb,
+        fc.nat(),
+        (alerts, customs, seed) => {
+          const base = triageReducer(makeState(alerts), {
+            type: 'HYDRATE_VIEWS',
+            views: customs,
+          });
+          const view = base.views[seed % base.views.length];
+          const next = triageReducer(base, { type: 'APPLY_VIEW', id: view.id });
+          expect(next.filter).toEqual(view.query.filter);
+          expect(next.search).toBe(view.query.search);
+          expect(next.sort).toEqual(view.query.sort);
+          expect(next.activeViewId).toBe(view.id);
+          expect(next.alerts).toBe(base.alerts);
+          expect(next.views).toBe(base.views);
+          expect(next.selectedId).toBe(base.selectedId);
+          expect(next.drawerOpen).toBe(base.drawerOpen);
+          expect(next.undoStack).toBe(base.undoStack);
+        },
+      ),
+    );
+  });
+
+  it('returns the same state reference for an unknown view id', () => {
+    fc.assert(
+      fc.property(fc.string({ minLength: 1 }), (id) => {
+        const state = makeState([]);
+        fc.pre(!state.views.some((v) => v.id === id));
+        expect(triageReducer(state, { type: 'APPLY_VIEW', id })).toBe(state);
+      }),
+    );
+  });
+
+  it('never mutates the prior state (deep-frozen state does not throw)', () => {
+    fc.assert(
+      fc.property(customViewsArb, fc.nat(), (customs, seed) => {
+        const base = triageReducer(makeState([]), {
+          type: 'HYDRATE_VIEWS',
+          views: customs,
+        });
+        const view = base.views[seed % base.views.length];
+        deepFreeze(base);
+        expect(() =>
+          triageReducer(base, { type: 'APPLY_VIEW', id: view.id }),
+        ).not.toThrow();
+      }),
+      { numRuns: 50 },
+    );
+  });
+});
+
+describe('triageReducer SAVE_VIEW', () => {
+  const validNameArb = fc
+    .string({ minLength: 1 })
+    .filter((name) => name.trim() !== '');
+
+  const stateWithQueryArb = fc
+    .tuple(filterArb, fc.string(), sortSpecArb)
+    .map(([filter, search, sort]) => ({
+      ...makeState([]),
+      filter,
+      search,
+      sort,
+    }));
+
+  it('appends one custom view capturing the live query and activates it', () => {
+    fc.assert(
+      fc.property(stateWithQueryArb, validNameArb, (state, name) => {
+        fc.pre(
+          !state.views.some(
+            (v) => v.name.toLowerCase() === name.trim().toLowerCase(),
+          ),
+        );
+        const next = triageReducer(state, { type: 'SAVE_VIEW', name });
+        expect(next.views.length).toBe(state.views.length + 1);
+        state.views.forEach((view, i) => expect(next.views[i]).toBe(view));
+        const added = next.views[next.views.length - 1];
+        expect(added.name).toBe(name.trim());
+        expect(added.builtIn).toBe(false);
+        expect(added.query.filter).toEqual(state.filter);
+        expect(added.query.search).toBe(state.search);
+        expect(added.query.sort).toEqual(state.sort);
+        expect(next.activeViewId).toBe(added.id);
+        expect(next.views.filter((v) => v.id === added.id)).toHaveLength(1);
+      }),
+    );
+  });
+
+  it('rejects whitespace-only names (same reference)', () => {
+    fc.assert(
+      fc.property(
+        fc.string({ unit: fc.constantFrom(' ', '\t', '\n') }),
+        (name) => {
+          const state = makeState([]);
+          expect(triageReducer(state, { type: 'SAVE_VIEW', name })).toBe(state);
+        },
+      ),
+    );
+  });
+
+  it('rejects names that duplicate an existing view case-insensitively', () => {
+    fc.assert(
+      fc.property(fc.nat(), fc.boolean(), (seed, upper) => {
+        const state = makeState([]);
+        const existing = state.views[seed % state.views.length].name;
+        const name = upper ? existing.toUpperCase() : existing.toLowerCase();
+        expect(triageReducer(state, { type: 'SAVE_VIEW', name })).toBe(state);
+      }),
+    );
+  });
+
+  it('saving twice with distinct names yields distinct ids', () => {
+    fc.assert(
+      fc.property(validNameArb, validNameArb, (first, second) => {
+        const state = makeState([]);
+        fc.pre(first.trim().toLowerCase() !== second.trim().toLowerCase());
+        fc.pre(
+          [first, second].every(
+            (name) =>
+              !state.views.some(
+                (v) => v.name.toLowerCase() === name.trim().toLowerCase(),
+              ),
+          ),
+        );
+        const once = triageReducer(state, { type: 'SAVE_VIEW', name: first });
+        const twice = triageReducer(once, { type: 'SAVE_VIEW', name: second });
+        const ids = twice.views.map((v) => v.id);
+        expect(new Set(ids).size).toBe(ids.length);
+      }),
+    );
+  });
+});
+
+describe('triageReducer DELETE_VIEW', () => {
+  const withCustoms = (customs: Parameters<typeof triageReducer>[0]['views']) =>
+    triageReducer(makeState([]), { type: 'HYDRATE_VIEWS', views: customs });
+
+  const nonEmptyCustomsArb = customViewsArb.filter((c) => c.length > 0);
+
+  it('returns the same reference for built-in or unknown ids', () => {
+    fc.assert(
+      fc.property(
+        customViewsArb,
+        fc.string({ minLength: 1 }),
+        (customs, randomId) => {
+          const state = withCustoms(customs);
+          for (const view of state.views.filter((v) => v.builtIn)) {
+            expect(
+              triageReducer(state, { type: 'DELETE_VIEW', id: view.id }),
+            ).toBe(state);
+          }
+          fc.pre(!state.views.some((v) => v.id === randomId));
+          expect(
+            triageReducer(state, { type: 'DELETE_VIEW', id: randomId }),
+          ).toBe(state);
+        },
+      ),
+    );
+  });
+
+  it('removes exactly the deleted view; the rest keep order and reference', () => {
+    fc.assert(
+      fc.property(nonEmptyCustomsArb, fc.nat(), (customs, seed) => {
+        const state = withCustoms(customs);
+        const customViews = state.views.filter((v) => !v.builtIn);
+        const target = customViews[seed % customViews.length];
+        const next = triageReducer(state, {
+          type: 'DELETE_VIEW',
+          id: target.id,
+        });
+        const remaining = state.views.filter((v) => v.id !== target.id);
+        expect(next.views.length).toBe(remaining.length);
+        next.views.forEach((view, i) => expect(view).toBe(remaining[i]));
+      }),
+    );
+  });
+
+  it('deleting the active custom view falls back to All alerts and its query', () => {
+    fc.assert(
+      fc.property(nonEmptyCustomsArb, fc.nat(), (customs, seed) => {
+        const base = withCustoms(customs);
+        const customViews = base.views.filter((v) => !v.builtIn);
+        const target = customViews[seed % customViews.length];
+        const active = triageReducer(base, {
+          type: 'APPLY_VIEW',
+          id: target.id,
+        });
+        const next = triageReducer(active, {
+          type: 'DELETE_VIEW',
+          id: target.id,
+        });
+        const all = builtinViews().find((v) => v.id === 'builtin-all');
+        expect(all).toBeDefined();
+        expect(next.activeViewId).toBe('builtin-all');
+        expect(next.filter).toEqual(all?.query.filter);
+        expect(next.search).toBe(all?.query.search);
+        expect(next.sort).toEqual(all?.query.sort);
+        expect(next.views.some((v) => v.id === target.id)).toBe(false);
+      }),
+    );
+  });
+
+  it('deleting an inactive view leaves the live query and active id alone', () => {
+    fc.assert(
+      fc.property(
+        nonEmptyCustomsArb,
+        fc.nat(),
+        savedViewQueryArb,
+        (customs, seed, query) => {
+          const base = withCustoms(customs);
+          const customViews = base.views.filter((v) => !v.builtIn);
+          const target = customViews[seed % customViews.length];
+          const state = { ...base, ...query, activeViewId: null };
+          const next = triageReducer(state, {
+            type: 'DELETE_VIEW',
+            id: target.id,
+          });
+          expect(next.filter).toBe(state.filter);
+          expect(next.search).toBe(state.search);
+          expect(next.sort).toBe(state.sort);
+          expect(next.activeViewId).toBeNull();
+        },
+      ),
+    );
+  });
+});
+
+describe('triageReducer HYDRATE_VIEWS', () => {
+  it('result is the built-ins followed by the payload, coerced to custom', () => {
+    fc.assert(
+      fc.property(customViewsArb, (customs) => {
+        const state = makeState([]);
+        const next = triageReducer(state, {
+          type: 'HYDRATE_VIEWS',
+          views: customs,
+        });
+        const builtins = state.views.filter((v) => v.builtIn);
+        expect(next.views.slice(0, builtins.length).map((v) => v.id)).toEqual(
+          builtins.map((v) => v.id),
+        );
+        expect(next.views.slice(builtins.length)).toEqual(
+          customs.map((v) => ({ ...v, builtIn: false })),
+        );
+        expect(next.activeViewId).toBe(state.activeViewId);
+        expect(next.filter).toBe(state.filter);
+        expect(next.search).toBe(state.search);
+        expect(next.sort).toBe(state.sort);
+      }),
+    );
+  });
+
+  it('is idempotent: hydrating twice deep-equals hydrating once', () => {
+    fc.assert(
+      fc.property(customViewsArb, (customs) => {
+        const action = { type: 'HYDRATE_VIEWS', views: customs } as const;
+        const once = triageReducer(makeState([]), action);
+        expect(triageReducer(once, action)).toEqual(once);
+      }),
+    );
+  });
+});
+
+describe('triageReducer UNDO', () => {
+  it('returns the same state reference when the stack is empty', () => {
+    fc.assert(
+      fc.property(uniqueAlertsArb, (alerts) => {
+        const state = makeState(alerts);
+        expect(triageReducer(state, { type: 'UNDO' })).toBe(state);
+      }),
+    );
+  });
+
+  it('SET_STATUS then UNDO restores every original status and pops the entry', () => {
+    fc.assert(
+      fc.property(setStatusCaseArb, ([alerts, index, status]) => {
+        const state = makeState(alerts);
+        const changed = triageReducer(state, {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+        });
+        const undone = triageReducer(changed, { type: 'UNDO' });
+        expect(
+          undone.alerts.map((a) => ({ id: a.id, status: a.status })),
+        ).toEqual(state.alerts.map((a) => ({ id: a.id, status: a.status })));
+        expect(undone.undoStack.length).toBe(
+          Math.max(changed.undoStack.length - 1, 0),
+        );
+      }),
+    );
+  });
+
+  it('a sequence of changes fully unwinds to the original statuses', () => {
+    const changesCaseArb = nonEmptyUniqueAlertsArb.chain((alerts) =>
+      fc.tuple(
+        fc.constant(alerts),
+        fc.array(
+          fc.tuple(
+            fc.nat({ max: alerts.length - 1 }),
+            fc.constantFrom(...STATUSES),
+          ),
+          { maxLength: 10 },
+        ),
+      ),
+    );
+    fc.assert(
+      fc.property(changesCaseArb, ([alerts, changes]) => {
+        let state = makeState(alerts);
+        for (const [index, status] of changes) {
+          state = triageReducer(state, {
+            type: 'SET_STATUS',
+            id: alerts[index].id,
+            status,
+          });
+        }
+        while (state.undoStack.length > 0) {
+          state = triageReducer(state, { type: 'UNDO' });
+        }
+        expect(
+          state.alerts.map((a) => ({ id: a.id, status: a.status })),
+        ).toEqual(alerts.map((a) => ({ id: a.id, status: a.status })));
+      }),
+    );
+  });
+
+  it('selects the undone alert and clears lastStatusChange', () => {
+    fc.assert(
+      fc.property(setStatusCaseArb, ([alerts, index, status]) => {
+        fc.pre(alerts[index].status !== status);
+        const changed = triageReducer(makeState(alerts), {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+        });
+        const undone = triageReducer(changed, { type: 'UNDO' });
+        expect(undone.selectedId).toBe(alerts[index].id);
+        expect(undone.lastStatusChange).toBeNull();
+      }),
+    );
+  });
+
+  it('never mutates the prior state (deep-frozen state does not throw)', () => {
+    fc.assert(
+      fc.property(setStatusCaseArb, ([alerts, index, status]) => {
+        fc.pre(alerts[index].status !== status);
+        const changed = triageReducer(makeState(structuredClone(alerts)), {
+          type: 'SET_STATUS',
+          id: alerts[index].id,
+          status,
+        });
+        deepFreeze(changed);
+        expect(() => triageReducer(changed, { type: 'UNDO' })).not.toThrow();
+      }),
+      { numRuns: 50 },
+    );
+  });
+});
+
 describe('initialTriageState', () => {
   it('copies the alerts and starts with the documented defaults', () => {
     fc.assert(
@@ -427,12 +989,26 @@ describe('initialTriageState', () => {
           severity: [],
           status: [],
           source: [],
+          assignee: [],
         });
         expect(state.search).toBe('');
         expect(state.sort).toEqual({ key: 'createdAt', direction: 'desc' });
         expect(state.selectedId).toBeNull();
         expect(state.drawerOpen).toBe(false);
+        expect(state.views).toEqual(builtinViews());
+        expect(state.activeViewId).toBe('builtin-all');
+        expect(state.undoStack).toEqual([]);
+        expect(state.lastStatusChange).toBeNull();
       }),
     );
+  });
+
+  it('the "All alerts" built-in query matches the initial live query', () => {
+    const state = initialTriageState([]);
+    const all = state.views.find((v) => v.id === 'builtin-all');
+    expect(all).toBeDefined();
+    expect(all?.query.filter).toEqual(state.filter);
+    expect(all?.query.search).toBe(state.search);
+    expect(all?.query.sort).toEqual(state.sort);
   });
 });
