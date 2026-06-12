@@ -5,15 +5,16 @@ A small Next.js + TypeScript page where a SOC analyst can triage ~200 mock secur
 ## Quickstart
 
 ```bash
-make install && make dev     # frontend at http://localhost:3000
+make up                      # docker compose: frontend http://localhost:3000 + API http://localhost:5080
+make down                    # stop everything
 make check                   # lint + format check + typecheck + unit & property tests
 make api-test                # xunit integration tests (runs inside a .NET SDK container)
 make api-smoke               # build + run API in Docker, curl happy/sad paths
-make up / make down          # API via docker compose at http://localhost:5080
+make install && make dev     # local dev server with hot reload (optional)
 make help                    # everything else
 ```
 
-No local .NET needed — all C# builds, tests, and runs go through Docker.
+Only Docker is required to run the app — `make up` builds and starts both containers (frontend is a standalone Next.js production build; no local .NET or Node needed).
 
 ## Key decisions & trade-offs
 

@@ -68,8 +68,8 @@ api-smoke: api-build ## Build, start, curl health + status-update happy/sad path
 
 ## ---------- Docker compose ----------
 
-up: ## Start the API via docker compose (detached)
-	docker compose up -d --build api
+up: ## Build and start frontend (:3000) + API (:5080) via docker compose
+	docker compose up -d --build
 
 down: ## Stop and remove compose services
 	docker compose down
