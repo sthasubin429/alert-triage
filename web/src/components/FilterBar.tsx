@@ -131,7 +131,10 @@ export default function FilterBar({
         </button>
       )}
 
-      <span className="ml-auto font-mono text-[11px] tabular-nums text-faint">
+      <span
+        aria-label="Result count"
+        className="ml-auto font-mono text-[11px] tabular-nums text-faint"
+      >
         <span className="text-fore">{resultCount}</span> of {totalCount}
       </span>
     </div>

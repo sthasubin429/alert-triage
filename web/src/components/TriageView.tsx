@@ -52,6 +52,8 @@ export default function TriageView({
 
   useEffect(() => {
     setNow(Date.now());
+    const interval = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const { filter, search, sort, selectedId } = state;
@@ -75,15 +77,21 @@ export default function TriageView({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
       const active = document.activeElement;
       const editable = isEditableTarget(active);
 
       if (event.key === 'Escape') {
-        if (editable) active.blur();
+        if (editable) {
+          active.blur();
+          return;
+        }
         dispatch({ type: 'CLOSE_DRAWER' });
         return;
       }
       if (editable) return;
+      if (active instanceof HTMLElement && active.tagName === 'BUTTON') return;
 
       if (event.key === '/') {
         event.preventDefault();
@@ -110,7 +118,11 @@ export default function TriageView({
           return;
         default: {
           const status = STATUS_KEYS[event.key];
-          if (status !== undefined && selectedId !== null) {
+          if (
+            status !== undefined &&
+            selectedId !== null &&
+            (visibleIds.includes(selectedId) || state.drawerOpen)
+          ) {
             dispatch({ type: 'SET_STATUS', id: selectedId, status });
           }
         }
@@ -119,7 +131,7 @@ export default function TriageView({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [visible, selectedId]);
+  }, [visible, selectedId, state.drawerOpen]);
 
   return (
     <div className="flex h-dvh flex-col">

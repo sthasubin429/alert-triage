@@ -139,10 +139,10 @@ describe('TriageView', () => {
       .getAllByRole('row')
       .filter((row) => row.closest('tbody'));
     expect(tbodyRows).toHaveLength(1);
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByLabelText('Result count')).toHaveTextContent('1 of 5');
   });
 
-  it('focuses search on / and closes the drawer on Escape', async () => {
+  it('focuses search on /; first Escape only blurs, second closes the drawer', async () => {
     const user = userEvent.setup();
     render(<TriageView initialAlerts={FIXTURE} />);
 
@@ -160,6 +160,64 @@ describe('TriageView', () => {
 
     await user.keyboard('{Escape}');
     expect(search).not.toHaveFocus();
+    expect(
+      screen.getByRole('dialog', { name: 'Alert detail' }),
+    ).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(
+      screen.queryByRole('dialog', { name: 'Alert detail' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not change status when a hotkey is pressed with a modifier (Cmd+A)', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const firstTitle = 'Alpha beacon to known C2 infrastructure';
+
+    await user.keyboard('j');
+    expect(rowOf(firstTitle)).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{Meta>}a{/Meta}');
+    expect(within(rowOf(firstTitle)).getByText('open')).toBeInTheDocument();
+    expect(
+      within(rowOf(firstTitle)).queryByText('ack'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('ignores status hotkeys once the selected row is filtered out (drawer closed)', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+    const firstTitle = 'Alpha beacon to known C2 infrastructure';
+    const statusFilter = screen.getByLabelText('Filter by status');
+
+    await user.selectOptions(statusFilter, 'open');
+    await user.keyboard('{Escape}'); // blur the select so hotkeys are live
+    await user.keyboard('j');
+    await user.keyboard('a'); // acknowledge: row leaves the "open" filter
+
+    const table = screen.getByRole('table');
+    expect(within(table).queryByText(firstTitle)).not.toBeInTheDocument();
+    await user.keyboard('r'); // must no-op: selected row is not visible
+
+    await user.selectOptions(statusFilter, '');
+    expect(within(rowOf(firstTitle)).getByText('ack')).toBeInTheDocument();
+    expect(
+      within(rowOf(firstTitle)).queryByText('resolved'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('Enter on a focused sort header sorts without opening the drawer', async () => {
+    const user = userEvent.setup();
+    render(<TriageView initialAlerts={FIXTURE} />);
+
+    await user.keyboard('j'); // select a row so a global Enter would open it
+    screen.getByRole('button', { name: 'Severity' }).focus();
+    await user.keyboard('{Enter}');
+
+    expect(
+      screen.getByRole('columnheader', { name: 'Severity' }),
+    ).toHaveAttribute('aria-sort', 'descending');
     expect(
       screen.queryByRole('dialog', { name: 'Alert detail' }),
     ).not.toBeInTheDocument();

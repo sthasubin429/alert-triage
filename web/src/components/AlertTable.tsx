@@ -109,8 +109,16 @@ export default function AlertTable({
                 }}
                 data-alert-id={alert.id}
                 aria-selected={selected}
+                tabIndex={0}
                 onClick={() => onSelect(alert.id)}
-                className={`cursor-pointer border-b border-edge/60 border-l-2 transition-colors ${
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') return;
+                  if (event.key === ' ') event.preventDefault();
+                  // Keep the global Enter hotkey from also firing for this press.
+                  event.stopPropagation();
+                  onSelect(alert.id);
+                }}
+                className={`cursor-pointer border-b border-edge/60 border-l-2 transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70 ${
                   stale
                     ? 'border-l-amber-500/80 bg-amber-500/[0.04]'
                     : 'border-l-transparent'
