@@ -25,6 +25,19 @@ export function isStale(alert: Alert, now: number): boolean {
 }
 
 /**
+ * Fraction of the severity SLA window consumed at the given time,
+ * or null for alerts that are not open (the SLA clock only runs on
+ * open alerts). Values above 1 mean the window is exceeded.
+ */
+export function slaRatio(alert: Alert, now: number): number | null {
+  if (alert.status !== 'open') {
+    return null;
+  }
+  const ageMs = now - Date.parse(alert.createdAt);
+  return ageMs / (STALE_SLA_HOURS[alert.severity] * HOUR_MS);
+}
+
+/**
  * Compact age string using the largest applicable unit, floored:
  * '<1m', '5m', '3h', '2d'. Future timestamps clamp to '<1m'.
  */

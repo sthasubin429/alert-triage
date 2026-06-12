@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import type { Alert, SortKey, SortSpec } from '@/lib/types';
-import { formatAge, isStale } from '@/lib/staleness';
+import { formatAge, isStale, slaRatio } from '@/lib/staleness';
 import SeverityBadge from '@/components/SeverityBadge';
 import StatusBadge from '@/components/StatusBadge';
 
@@ -61,16 +61,16 @@ export default function AlertTable({
                 <button
                   type="button"
                   onClick={() => onSort(col.key)}
-                  className={`flex h-8 w-full items-center gap-1 font-mono text-[10px] font-medium uppercase tracking-[0.14em] transition-colors ${
+                  className={`flex h-8 w-full items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70 ${
                     active ? 'text-accent' : 'text-faint hover:text-fore'
                   }`}
                 >
                   {col.label}
                   <span
                     aria-hidden
-                    className={`text-[8px] ${active ? '' : 'invisible'}`}
+                    className={`text-[11px] ${active ? '' : 'invisible'}`}
                   >
-                    {active && sort.direction === 'asc' ? '▲' : '▼'}
+                    {active && sort.direction === 'asc' ? '↑' : '↓'}
                   </span>
                 </button>
               </th>
@@ -78,7 +78,7 @@ export default function AlertTable({
           })}
           <th
             scope="col"
-            className="w-32 px-3 py-0 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-faint"
+            className="w-32 px-3 py-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-faint"
           >
             Assignee
           </th>
@@ -100,6 +100,12 @@ export default function AlertTable({
           alerts.map((alert) => {
             const selected = alert.id === selectedId;
             const stale = now !== null && isStale(alert, now);
+            const ratio = now === null ? null : slaRatio(alert, now);
+            const ageClass = stale
+              ? 'text-amber-300'
+              : ratio !== null && ratio >= 0.75
+                ? 'text-amber-200/80'
+                : 'text-faint';
             return (
               <tr
                 key={alert.id}
@@ -119,17 +125,19 @@ export default function AlertTable({
                   onSelect(alert.id);
                 }}
                 className={`cursor-pointer border-b border-edge/60 border-l-2 transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-accent/70 ${
-                  stale
-                    ? 'border-l-amber-500/80 bg-amber-500/[0.04]'
-                    : 'border-l-transparent'
+                  selected
+                    ? 'border-l-accent'
+                    : stale
+                      ? 'border-l-amber-500/80'
+                      : 'border-l-transparent'
                 } ${
                   selected
-                    ? 'bg-accent/10 shadow-[inset_0_0_0_1px_rgb(76_201_176/0.45)]'
-                    : 'hover:bg-panel-2'
+                    ? 'bg-accent/10'
+                    : `hover:bg-panel-2 ${stale ? 'bg-amber-500/[0.04]' : ''}`
                 }`}
               >
                 <td className="px-3 py-1.5">
-                  <SeverityBadge severity={alert.severity} />
+                  <SeverityBadge severity={alert.severity} variant="plain" />
                 </td>
                 <td className="w-full max-w-0 truncate px-3 py-1.5">
                   <span className="mr-2 font-mono text-[11px] text-dim">
@@ -143,10 +151,12 @@ export default function AlertTable({
                 <td className="px-3 py-1.5">
                   <StatusBadge status={alert.status} />
                 </td>
-                <td className="whitespace-nowrap px-3 py-1.5 font-mono text-[11px] tabular-nums text-faint">
+                <td
+                  className={`whitespace-nowrap px-3 py-1.5 font-mono text-[11px] tabular-nums ${ageClass}`}
+                >
                   {now === null ? '—' : formatAge(alert.createdAt, now)}
                   {stale && (
-                    <span className="ml-1.5 rounded-sm border border-amber-500/50 bg-amber-500/15 px-1 text-[9px] uppercase tracking-[0.08em] text-amber-300">
+                    <span className="ml-1.5 rounded-sm border border-amber-500/50 bg-amber-500/15 px-1 text-[11px] uppercase tracking-[0.08em] text-amber-300">
                       SLA
                     </span>
                   )}

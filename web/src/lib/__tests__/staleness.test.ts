@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { STALE_SLA_HOURS, formatAge, isStale } from '@/lib/staleness';
+import { STALE_SLA_HOURS, formatAge, isStale, slaRatio } from '@/lib/staleness';
 import { SEVERITIES, STATUSES } from '@/lib/types';
 import type { Alert, Severity, Status } from '@/lib/types';
 import { alertArb } from './arbitraries';
@@ -91,6 +91,57 @@ describe('isStale', () => {
         }),
         (alert, now) => {
           expect(isStale(alert, now)).toBe(false);
+        },
+      ),
+    );
+  });
+});
+
+describe('slaRatio', () => {
+  const nowArb = fc.integer({
+    min: Date.parse('2000-01-01T00:00:00.000Z'),
+    max: Date.parse('2050-01-01T00:00:00.000Z'),
+  });
+  const openAlertArb = alertArb.map(
+    (alert): Alert => ({ ...alert, status: 'open' }),
+  );
+
+  it('is the consumed fraction of the SLA window for open alerts', () => {
+    const halfway = makeAlert({ createdAt: createdAgo(HOUR_MS) });
+    expect(slaRatio(halfway, NOW)).toBe(0.5);
+    const lowQuarter = makeAlert({
+      severity: 'low',
+      createdAt: createdAgo(18 * HOUR_MS),
+    });
+    expect(slaRatio(lowQuarter, NOW)).toBe(0.25);
+  });
+
+  it('property: null iff the alert is not open', () => {
+    fc.assert(
+      fc.property(alertArb, nowArb, (alert, now) => {
+        expect(slaRatio(alert, now) === null).toBe(alert.status !== 'open');
+      }),
+    );
+  });
+
+  it('property: ratio above 1 exactly when the alert is stale', () => {
+    fc.assert(
+      fc.property(openAlertArb, nowArb, (alert, now) => {
+        expect(slaRatio(alert, now)! > 1).toBe(isStale(alert, now));
+      }),
+    );
+  });
+
+  it('property: strictly increases as time passes', () => {
+    fc.assert(
+      fc.property(
+        openAlertArb,
+        fc.uniqueArray(nowArb, { minLength: 2, maxLength: 2 }),
+        (alert, nows) => {
+          const [earlier, later] = [...nows].sort((a, b) => a - b);
+          expect(slaRatio(alert, later)!).toBeGreaterThan(
+            slaRatio(alert, earlier)!,
+          );
         },
       ),
     );
