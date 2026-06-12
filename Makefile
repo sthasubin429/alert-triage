@@ -22,10 +22,12 @@ web/node_modules: web/package.json web/package-lock.json
 	cd web && npm ci
 	@touch web/node_modules
 
-dev: web/node_modules ## Run Next.js dev server (http://localhost:3000)
+dev: web/node_modules ## Run BOTH: API in Docker (:5080) + Next.js dev server with hot reload (:3000)
+	docker compose up -d --build api
+	@echo "api running on http://localhost:5080 — 'make down' stops it"
 	cd web && npm run dev
 
-build: web-build ## Build everything: frontend bundle + all Docker images
+build: ## Build both Docker containers (web + api)
 	docker compose build
 
 web-build: web/node_modules ## Production build of the frontend only

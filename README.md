@@ -8,11 +8,11 @@ A small Next.js + TypeScript page where a SOC analyst can triage ~200 mock secur
 make setup                   # ground-up setup on a fresh machine (only Docker required)
 make up                      # build + start the full stack: frontend http://localhost:3000 + API http://localhost:5080
 make down                    # stop everything
+make dev                     # dev mode for BOTH: API in Docker + frontend with hot reload
 make test                    # ALL tests: TypeScript unit/property + C# xunit (in Docker)
 make check                   # full gate: lint + format check + typecheck + all tests
-make build                   # build everything: frontend bundle + all Docker images
+make build                   # build both Docker containers (web + api)
 make api-smoke               # build + run API in Docker, curl happy/sad paths
-make dev                     # local dev server with hot reload (deps auto-install via npm ci)
 make help                    # everything else
 ```
 
